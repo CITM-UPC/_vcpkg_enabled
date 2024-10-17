@@ -18,6 +18,9 @@ using namespace std;
 
 struct MyMesh
 {
+	Transform transform;
+	glm::u8vec3 color;
+
 	unsigned int id_index = 0; // index in VRAM
 	unsigned int num_index = 0;
 	unsigned int* index = nullptr;
@@ -37,7 +40,7 @@ public:
 			// Use scene->mNumMeshes to iterate on scene->mMeshes array 
 			for (int i = 0; i < scene->mNumMeshes; ++i)
 			{
-				MyMesh* ourMesh;
+				MyMesh* ourMesh = new MyMesh();
 				ourMesh->num_vertex = scene->mMeshes[i]->mNumVertices;
 				ourMesh->vertex = new float[ourMesh->num_vertex * 3];
 				memcpy(ourMesh->vertex, scene->mMeshes[i]->mVertices, sizeof(float) * ourMesh->num_vertex * 3);
@@ -64,16 +67,46 @@ public:
 
 	}
 
-	/*void InitBuffers()
+	void InitBuffers()
 	{
 
-		glGenBuffers(1, &id_vertex);
+		/*glGenBuffers(1, &id_vertex);
 		glBindBuffer(GL_ARRAY_BUFFER, id_vertex);
-		glBufferData(GL_ARRAY_BUFFER, vertex_data.size() * sizeof(vec3), vertex_data.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, num_vertex * sizeof(float), vertex, GL_STATIC_DRAW);
 
-		glGenBuffers(1, &index_data_buffer_id);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_data_buffer_id);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_data.size() * sizeof(unsigned int), index_data.data(), GL_STATIC_DRAW);
+		glGenBuffers(1, &id_index);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_index);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, num_index * sizeof(unsigned int), index, GL_STATIC_DRAW);*/
+
+		//Generate the VAO
+		//glGenVertexArrays(1, &VAO);
+
+		//Generate the buffer objects
+		glGenBuffers(1, &id_vertex);
+		glGenBuffers(1, &id_index);
+
+		//Bind the VAO
+		//glBindVertexArray(VAO);
+
+		//Bind the VBO and set the vertices
+		glBindBuffer(GL_ARRAY_BUFFER, id_vertex);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * num_vertex, vertex, GL_STATIC_DRAW);
+
+		//Enable the first attribute pointer
+		glEnableVertexAttribArray(0);
+		//Set the attribute pointer    The stride is meant to be 'sizeof(Vertex)', but it doesn't work at all that way
+		//                                              \/
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+		//Enable the second attribute pointer
+		glEnableVertexAttribArray(1);
+		//Set the attribute pointer                   ditto
+		//                                              \/
+		//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)offsetof(Vertex, normal));
+
+		//Bind the EBO and set the indices
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_index);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * num_index, index, GL_STATIC_DRAW);
 
 	}
 
@@ -83,13 +116,16 @@ public:
 		glMultMatrixd(&transform.mat()[0][0]);
 		glColor3ub(color.r, color.g, color.b);
 		glEnableClientState(GL_VERTEX_ARRAY);
-		glBindBuffer(GL_ARRAY_BUFFER, vertex_data_buffer_id);
+		glBindBuffer(GL_ARRAY_BUFFER, id_vertex);
 		glVertexPointer(3, GL_DOUBLE, 0, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_data_buffer_id);
-		glDrawElements(GL_TRIANGLES, index_data.size(), GL_UNSIGNED_INT, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_index);
+		glDrawElements(GL_TRIANGLES, num_index, GL_UNSIGNED_INT, 0);
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glPopMatrix();
-	}*/
+
+		
+
+	}
 };
 
 struct Triangle {
@@ -185,6 +221,7 @@ static Triangle red_triangle;
 static Triangle green_triangle;
 static Triangle blue_triangle;
 static Cube cube;
+static MyMesh mesh;
 
 static array< array<glm::u8vec3, 256>, 256> texture;
 
@@ -287,6 +324,13 @@ int main(int argc, char* argv[]) {
 	stream = aiGetPredefinedLogStream(aiDefaultLogStream_DEBUGGER, nullptr);
 	aiAttachLogStream(&stream);
 
+	// Init My Mesh
+	mesh.LoadFile("BakerHouse.fbx");
+	mesh.InitBuffers();
+	mesh.Draw();
+
+	mesh.transform.pos() = vec3(0, 1, 0);
+
 	// Init triangles
 	/*red_triangle.transform.pos() = vec3(0, 1, 0);
 	red_triangle.color = glm::u8vec3(255, 0, 0);
@@ -327,6 +371,8 @@ int main(int argc, char* argv[]) {
 
 	// Init cube
 	//cube.initBuffers();
+
+
 
 	// Set Glut callbacks
 	glutDisplayFunc(display_func);
