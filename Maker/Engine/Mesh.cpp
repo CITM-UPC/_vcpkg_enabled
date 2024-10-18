@@ -53,19 +53,23 @@ std::vector<Mesh*> Mesh::LoadFile(const char* file_path)
 
 void Mesh::BufferData()
 {
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+	glGenVertexArrays(1, &id_vertex);
+	glGenBuffers(1, &id_vertex);
+	
 
-	glBindVertexArray(VAO);
+	glBindVertexArray(id_vertex);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, num_vertex * 3 * sizeof(float), vertex, GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, num_index * sizeof(unsigned int), index, GL_STATIC_DRAW);
-
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+	if (index) {
+		glGenBuffers(1, &id_index);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_index);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * num_index, index, GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
+
 	glEnableVertexAttribArray(0);
 
 	glBindVertexArray(0);
@@ -75,11 +79,19 @@ void Mesh::BufferData()
 
 void Mesh::Draw()
 {
-	glBegin(GL_TRIANGLES);
-	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, num_index, GL_UNSIGNED_INT, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, id_vertex);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	
+	glBindVertexArray(id_vertex);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_index);
+	glDrawElements(GL_TRIANGLES, num_index, GL_FLOAT, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	
 	glBindVertexArray(0);
-	glEnd();
+	
 
 }
 
