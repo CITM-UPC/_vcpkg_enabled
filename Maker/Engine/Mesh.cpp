@@ -75,9 +75,11 @@ void Mesh::BufferData()
 
 void Mesh::Draw()
 {
+	glBegin(GL_TRIANGLES);
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, num_index, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+	glEnd();
 
 }
 

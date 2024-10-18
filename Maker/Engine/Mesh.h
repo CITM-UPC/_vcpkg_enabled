@@ -14,7 +14,7 @@
 class Mesh
 {
 	Transform transform;
-	glm::u8vec3 color;
+	glm::u8vec3 color = glm::u8vec3(255, 0, 255);
 
 	unsigned int id_index = 0; // index in VRAM
 	unsigned int num_index = 0;

@@ -16,12 +16,6 @@ using namespace std;
 #include <array>
 using namespace std;
 
-
-
-
-
-
-
 static Camera camera;
 static Mesh mesh;
 std::vector<Mesh*> meshesToDraw;
@@ -125,7 +119,8 @@ int main(int argc, char* argv[]) {
 	aiAttachLogStream(&stream);
 
 	// Init My Mesh
-	 meshesToDraw = mesh.LoadFile("BakerHouse.fbx");
+	meshesToDraw = mesh.LoadFile("BakerHouse.fbx");
+	 
 	
 	
 
