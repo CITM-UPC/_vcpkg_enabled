@@ -35,7 +35,7 @@ public:
 	virtual ~Mesh();
 
 	// Load Meshes from a file
-	std::vector<Mesh*> LoadFile(const char* file_path);
+	void LoadFile(const char* file_path);
 
 	// Get Buffer data
 	void BufferData();

@@ -18,7 +18,7 @@ using namespace std;
 
 static Camera camera;
 static Mesh mesh;
-std::vector<Mesh*> meshesToDraw;
+
 
 static array< array<glm::u8vec3, 256>, 256> texture;
 
@@ -54,10 +54,7 @@ static void display_func() {
 	glLoadMatrixd(&camera.view()[0][0]);
 
 	drawFloorGrid(16, 0.25);
-	for (int i = 0; i < meshesToDraw.size(); ++i)
-	{
-		meshesToDraw[i]->Draw();
-	}
+	mesh.Draw();
 
 	glutSwapBuffers();
 }
@@ -119,7 +116,7 @@ int main(int argc, char* argv[]) {
 	aiAttachLogStream(&stream);
 
 	// Init My Mesh
-	meshesToDraw = mesh.LoadFile("BakerHouse.fbx");
+	mesh.LoadFile("BakerHouse.fbx");
 	 
 	
 	
