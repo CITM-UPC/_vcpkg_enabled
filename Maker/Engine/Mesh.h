@@ -6,42 +6,42 @@
 #include "GameObject.h"
 #include <glm/glm.hpp>
 #include <GL/glew.h>
+#include <IL/il.h>
+#include <IL/ilu.h>
 #include "Transform.h"
 #include <vector>
 #include <memory>
 #include <string>
 
+#include "BufferObject.h"
+
 class Mesh
 {
-	Transform transform;
-	glm::u8vec3 color = glm::u8vec3(255, 0, 255);
+	std::vector<glm::vec3> _vertices;
+	std::vector<unsigned int> _indices;
 
-	unsigned int id_index = 0; // index in VRAM
-	unsigned int num_index = 0;
-	unsigned int* index = nullptr;
-
-	unsigned int id_vertex = 0; // unique vertex in VRAM
-	unsigned int num_vertex = 0;
-	float* vertex = nullptr;
-
-	bool drawWireframe = true;
-
-private:
-	unsigned int VAO, VBO, EBO;
+	BufferObject _vertices_buffer;
+	BufferObject _indices_buffer;
+	BufferObject _texCoords_buffer;
+	BufferObject _normals_buffer;
+	BufferObject _colors_buffer;
 
 public:
 
-	Mesh();
-	virtual ~Mesh();
+	const auto& vertices() const { return _vertices; }
+	const auto& indices() const { return _indices; }
+
+	void load(const glm::vec3* vertices, size_t num_verts, unsigned int* indices, size_t num_indexs);
+	void loadTexCoords(const glm::vec2* tex_coords, size_t num_tex_coords);
+	void loadNormals(const glm::vec3* normals, size_t num_normals);
+	void loadColors(const glm::u8vec3* colors, size_t num_colors);
+	void draw() const;
 
 	// Load Meshes from a file
 	void LoadFile(const char* file_path);
 
-	// Get Buffer data
-	void BufferData();
-
-	// Draw the mesh
-	void Draw();
+	// Load Texture
+	void LoadTexture(const char* path);
 
 	
 

@@ -14,6 +14,22 @@ using namespace std;
 #include "Engine/Mesh.h"
 #include <vector>
 #include <array>
+#include <GL/glew.h>
+#include <chrono>
+#include <thread>
+#include <exception>
+#include <glm/glm.hpp>
+#include "MyWindow.h"
+using namespace std;
+
+using hrclock = chrono::high_resolution_clock;
+using u8vec4 = glm::u8vec4;
+using ivec2 = glm::ivec2;
+using vec3 = glm::dvec3;
+
+static const ivec2 WINDOW_SIZE(512, 512);
+static const unsigned int FPS = 60;
+static const auto FRAME_DT = 1.0s / FPS;
 using namespace std;
 
 static Camera camera;
@@ -54,7 +70,7 @@ static void display_func() {
 	glLoadMatrixd(&camera.view()[0][0]);
 
 	drawFloorGrid(16, 0.25);
-	mesh.Draw();
+	mesh.draw();
 
 	glutSwapBuffers();
 }
@@ -98,13 +114,19 @@ static void idle_func() {
 
 int main(int argc, char* argv[]) {
 	// Iniit window and context
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-	glutInitWindowSize(1280, 720);
-	glutCreateWindow("Glut Simple Example");
+	MyWindow window("SDL2 Simple Example", WINDOW_SIZE.x, WINDOW_SIZE.y);
 
-	// Init OpenGL
 	init_opengl();
+
+	while (window.processEvents() && window.isOpen()) {
+		const auto t0 = hrclock::now();
+		display_func();
+		window.swapBuffers();
+		const auto t1 = hrclock::now();
+		const auto dt = t1 - t0;
+		if (dt < FRAME_DT) this_thread::sleep_for(FRAME_DT - dt);
+	}
+	
 
 	// Init camera
 	camera.transform().pos() = vec3(0, 1, 4);
@@ -117,44 +139,9 @@ int main(int argc, char* argv[]) {
 
 	// Init My Mesh
 	mesh.LoadFile("BakerHouse.fbx");
-	 
-	
 	
 
-	// Init triangles
-	/*red_triangle.transform.pos() = vec3(0, 1, 0);
-	red_triangle.color = glm::u8vec3(255, 0, 0);
-	green_triangle.transform.pos() = vec3(1, 1, 0);
-	green_triangle.color = glm::u8vec3(0, 255, 0);
-	blue_triangle.transform.pos() = vec3(0, 1, 1);
-	blue_triangle.color = glm::u8vec3(255, 255, 255);*/
-
-	// Init Texture
-
-	ilInit();
-	iluInit();
-	auto il_img_id = ilGenImage();
-	ilBindImage(il_img_id);
-	//ilLoadImage("Lenna.png");
-	auto img_width = ilGetInteger(IL_IMAGE_WIDTH);
-	auto img_height = ilGetInteger(IL_IMAGE_HEIGHT);
-	auto img_bpp = ilGetInteger(IL_IMAGE_BPP);
-	auto img_format = ilGetInteger(IL_IMAGE_FORMAT);
-	auto img_data = ilGetData();
-
-
-	initializeTexture();
-	unsigned int texture_id = 0;
-	glGenTextures(1, &texture_id);
-	glBindTexture(GL_TEXTURE_2D, texture_id);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.front().size(), texture.size(), 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data());
-	glTexImage2D(GL_TEXTURE_2D, 0, img_bpp, img_width, img_height, 0, img_format, GL_UNSIGNED_BYTE, img_data);
-	ilDeleteImage(il_img_id);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_NEAREST);
+	
 	
 
 	// Init cube
