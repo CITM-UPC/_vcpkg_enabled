@@ -6,6 +6,7 @@ using namespace std;
 #include <GL/freeglut.h>
 #include <IL/il.h>
 #include <IL/ilu.h>
+#include <IL/ilut.h>
 #include <assimp/Importer.hpp>
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
@@ -51,7 +52,7 @@ static void initializeTexture()
 }
 
 static void drawFloorGrid(int size, double step) {
-	glColor3ub(0, 0, 0);
+	glColor3ub(255, 0, 255);
 	glBegin(GL_LINES);
 	for (double i = -size; i <= size; i += step) {
 		glVertex3d(i, 0, -size);
@@ -89,21 +90,9 @@ static void display_func() {
 
 static void init_opengl() {
 	glewInit();
-
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-
-	glEnable(GL_POLYGON_SMOOTH);
-	glEnable(GL_LINE_SMOOTH);
-	glEnable(GL_POINT_SMOOTH);
-
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_BLEND);
-
+	if (!GLEW_VERSION_3_0) throw exception("OpenGL 3.0 API is not available.");
 	glEnable(GL_DEPTH_TEST);
-
+	glEnable(GL_TEXTURE_2D);
 	glClearColor(0.5, 0.5, 0.5, 1.0);
 }
 
@@ -122,6 +111,9 @@ static void mouseWheel_func(int wheel, int direction, int x, int y) {
 
 int main(int argc, char* argv[]) {
 	// Iniit window and context
+	ilInit();
+	iluInit();
+	ilutInit();
 	MyWindow window("SDL2 Simple Example", WINDOW_SIZE.x, WINDOW_SIZE.y);
 
 	init_opengl();
@@ -137,6 +129,7 @@ int main(int argc, char* argv[]) {
 
 	// Init My Mesh
 	mesh.LoadFile("BakerHouse.fbx");
+	mesh.LoadTexture("Baker_house.png");
 
 	while (window.processEvents() && window.isOpen()) {
 		const auto t0 = hrclock::now();

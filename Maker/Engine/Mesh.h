@@ -26,6 +26,8 @@ class Mesh
 	BufferObject _normals_buffer;
 	BufferObject _colors_buffer;
 
+	unsigned int texture_id = 0;
+
 public:
 
 	const auto& vertices() const { return _vertices; }
@@ -40,8 +42,11 @@ public:
 	// Load Meshes from a file
 	void LoadFile(const char* file_path);
 
+	//
+	void CheckerTexture();
+
 	// Load Texture
-	void LoadTexture(const char* path);
+	void LoadTexture(const std::string& path);
 
 	
 

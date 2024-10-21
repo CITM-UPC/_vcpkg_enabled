@@ -3,6 +3,9 @@
 #include <GL/glew.h>
 using namespace std;
 
+#define CHECKERS_HEIGHT 32
+#define CHECKERS_WIDTH 32
+
 void Mesh::load(const glm::vec3* vertices, size_t num_verts, unsigned int* indices, size_t num_indexs)
 {
 	_vertices_buffer.loadData(vertices, num_verts * sizeof(glm::vec3));
@@ -34,6 +37,13 @@ void Mesh::loadColors(const glm::u8vec3* colors, size_t num_colors)
 
 void Mesh::draw() const
 {
+
+	if (texture_id)
+	{
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+	}
+
 	if (_texCoords_buffer.id())
 	{
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -66,6 +76,12 @@ void Mesh::draw() const
 	if (_colors_buffer.id()) glDisableClientState(GL_COLOR_ARRAY);
 	if (_normals_buffer.id()) glDisableClientState(GL_NORMAL_ARRAY);
 	if (_texCoords_buffer.id()) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	if (texture_id)
+	{
+		glDisable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 }
 
 void Mesh::LoadFile(const char* file_path)
@@ -81,6 +97,15 @@ void Mesh::LoadFile(const char* file_path)
 			
 			size_t num_vertex = scene->mMeshes[i]->mNumVertices;
 			glm::vec3* vertex =  new glm::vec3[num_vertex * 3];
+			size_t num_texCoords = num_vertex;
+			glm::vec2* texCoords = new glm::vec2[num_vertex * 3];
+
+			for (int k = 0; k < scene->mMeshes[i]->mNumVertices; ++k)
+			{
+				memcpy(texCoords, new glm::vec2(scene->mMeshes[i]->mTextureCoords[0][i].x, scene->mMeshes[i]->mTextureCoords[0][i].y), sizeof(float) * num_texCoords * 3);
+			}
+			loadTexCoords(texCoords, num_texCoords);
+			
 			memcpy(vertex, scene->mMeshes[i]->mVertices, sizeof(float) * num_vertex * 3);
 
 			if (scene->mMeshes[i]->HasFaces())
@@ -110,6 +135,47 @@ void Mesh::LoadFile(const char* file_path)
 	}
 
 	
+}
+
+void Mesh::CheckerTexture()
+{
+	GLubyte checkerImage[CHECKERS_HEIGHT][CHECKERS_WIDTH][4];
+	for (int i = 0; i < CHECKERS_HEIGHT; i++) {
+		for (int j = 0; j < CHECKERS_WIDTH; j++) {
+			int c = ((((i & 0x8) == 0) ^ (((j & 0x8)) == 0))) * 255;
+			checkerImage[i][j][0] = (GLubyte)c;
+			checkerImage[i][j][1] = (GLubyte)c;
+			checkerImage[i][j][2] = (GLubyte)c;
+			checkerImage[i][j][3] = (GLubyte)255;
+		}
+	}
+	
+
+}
+
+void Mesh::LoadTexture(const std::string& path)
+{
+	auto il_img_id = ilGenImage();
+	ilBindImage(il_img_id);
+	
+	ilLoadImage((const wchar_t*)path.c_str());
+	auto img_width = ilGetInteger(IL_IMAGE_WIDTH);
+	auto img_height = ilGetInteger(IL_IMAGE_HEIGHT);
+	auto img_bpp = ilGetInteger(IL_IMAGE_BPP);
+	auto img_format = ilGetInteger(IL_IMAGE_FORMAT);
+	auto img_data = ilGetData();
+
+
+	CheckerTexture();
+	glGenTextures(1, &texture_id);
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, img_bpp, img_width, img_height, 0, img_format, GL_UNSIGNED_BYTE, img_data);
+	ilDeleteImage(il_img_id);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_NEAREST);
 }
 
 
