@@ -14,12 +14,11 @@ using namespace std;
 #include "Engine/Mesh.h"
 #include <vector>
 #include <array>
-#include <GL/glew.h>
 #include <chrono>
 #include <thread>
 #include <exception>
-#include <glm/glm.hpp>
-#include "MyWindow.h"
+#include "Engine/MyWindow.h"
+#include <glm/gtc/type_ptr.hpp>
 using namespace std;
 
 using hrclock = chrono::high_resolution_clock;
@@ -27,7 +26,7 @@ using u8vec4 = glm::u8vec4;
 using ivec2 = glm::ivec2;
 using vec3 = glm::dvec3;
 
-static const ivec2 WINDOW_SIZE(512, 512);
+static const ivec2 WINDOW_SIZE(1280, 720);
 static const unsigned int FPS = 60;
 static const auto FRAME_DT = 1.0s / FPS;
 using namespace std;
@@ -63,16 +62,29 @@ static void drawFloorGrid(int size, double step) {
 	glEnd();
 }
 
+void configureCamera()
+{
+	glm::dmat4 projectionMatrix = camera.projection();
+	glm::dmat4 viewMatrix = camera.view();
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixd(glm::value_ptr(projectionMatrix));
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixd(glm::value_ptr(viewMatrix));
+}
+
 static void display_func() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixd(&camera.view()[0][0]);
+	/*glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixd(&camera.view()[0][0]);*/
+
+	configureCamera();
 
 	drawFloorGrid(16, 0.25);
 	mesh.draw();
 
-	glutSwapBuffers();
 }
 
 static void init_opengl() {
@@ -106,27 +118,13 @@ static void mouseWheel_func(int wheel, int direction, int x, int y) {
 	camera.transform().translate(vec3(0, 0, direction * 0.1));
 }
 
-static void idle_func() {
-	//animate triangles
-	
-	glutPostRedisplay();
-}
+
 
 int main(int argc, char* argv[]) {
 	// Iniit window and context
 	MyWindow window("SDL2 Simple Example", WINDOW_SIZE.x, WINDOW_SIZE.y);
 
 	init_opengl();
-
-	while (window.processEvents() && window.isOpen()) {
-		const auto t0 = hrclock::now();
-		display_func();
-		window.swapBuffers();
-		const auto t1 = hrclock::now();
-		const auto dt = t1 - t0;
-		if (dt < FRAME_DT) this_thread::sleep_for(FRAME_DT - dt);
-	}
-	
 
 	// Init camera
 	camera.transform().pos() = vec3(0, 1, 4);
@@ -139,24 +137,19 @@ int main(int argc, char* argv[]) {
 
 	// Init My Mesh
 	mesh.LoadFile("BakerHouse.fbx");
+
+	while (window.processEvents() && window.isOpen()) {
+		const auto t0 = hrclock::now();
+		display_func();
+		window.swapBuffers();
+		const auto t1 = hrclock::now();
+		const auto dt = t1 - t0;
+		if (dt < FRAME_DT) this_thread::sleep_for(FRAME_DT - dt);
+	}
 	
 
 	
-	
 
-	// Init cube
-	//cube.initBuffers();
-
-
-
-	// Set Glut callbacks
-	glutDisplayFunc(display_func);
-	glutIdleFunc(idle_func);
-	glutReshapeFunc(reshape_func);
-	glutMouseWheelFunc(mouseWheel_func);
-
-	// Enter glut main loop
-	glutMainLoop();
 
 	return EXIT_SUCCESS;
 }

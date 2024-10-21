@@ -1,4 +1,4 @@
 {
 	"$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-	"dependencies": [ "glm", "glew", "freeglut", "devil", "assimp" ]
+	"dependencies": [ "glm", "glew", "freeglut", "devil", "assimp", "sdl2" ]
 }
