@@ -52,7 +52,7 @@ static void initializeTexture()
 }
 
 static void drawFloorGrid(int size, double step) {
-	glColor3ub(255, 0, 255);
+	//glColor3ub(0, 0, 0);
 	glBegin(GL_LINES);
 	for (double i = -size; i <= size; i += step) {
 		glVertex3d(i, 0, -size);
@@ -61,6 +61,7 @@ static void drawFloorGrid(int size, double step) {
 		glVertex3d(size, 0, i);
 	}
 	glEnd();
+
 }
 
 void configureCamera()
@@ -78,12 +79,10 @@ void configureCamera()
 static void display_func() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	/*glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixd(&camera.view()[0][0]);*/
-
 	configureCamera();
 
 	drawFloorGrid(16, 0.25);
+
 	mesh.draw();
 
 }
