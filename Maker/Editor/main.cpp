@@ -20,6 +20,7 @@ using namespace std;
 #include <exception>
 #include "Engine/MyWindow.h"
 #include <glm/gtc/type_ptr.hpp>
+#include <SDL2/SDL_events.h>
 using namespace std;
 
 using hrclock = chrono::high_resolution_clock;
@@ -36,20 +37,7 @@ static Camera camera;
 static Mesh mesh;
 
 
-static array< array<glm::u8vec3, 256>, 256> texture;
 
-static void initializeTexture()
-{
-	for (int s = 0; s < texture.front().size(); ++s)
-	{
-		for (int t = 0; t < texture.size(); ++t)
-		{
-			const glm::u8vec3 whiteColor(255, 255, 255);
-			const glm::u8vec3 blackColor(0, 0, 0);
-			texture[s][t] = (s / 8 + t / 8) % 2 == 0 ? whiteColor : blackColor;
-		}
-	}
-}
 
 static void drawFloorGrid(int size, double step) {
 	//glColor3ub(0, 0, 0);
@@ -127,8 +115,11 @@ int main(int argc, char* argv[]) {
 	aiAttachLogStream(&stream);
 
 	// Init My Mesh
-	mesh.LoadFile("BakerHouse.fbx");
-	mesh.LoadTexture("Baker_house.png");
+	/*mesh.LoadFile("BakerHouse.fbx");
+	mesh.LoadTexture("Baker_house.png");*/
+	
+	SDL_Event event;
+	char* dropped_filePath;
 
 	while (window.processEvents() && window.isOpen()) {
 		const auto t0 = hrclock::now();
@@ -137,6 +128,20 @@ int main(int argc, char* argv[]) {
 		const auto t1 = hrclock::now();
 		const auto dt = t1 - t0;
 		if (dt < FRAME_DT) this_thread::sleep_for(FRAME_DT - dt);
+
+		while (SDL_PollEvent(&event))
+		{
+			switch (event.type)
+			{
+			case SDL_DROPFILE:
+				dropped_filePath = event.drop.file;
+				mesh.LoadFile(dropped_filePath);
+				mesh.LoadTexture("Baker_house.png");
+				SDL_free(dropped_filePath);
+				break;
+			}
+		}
+
 	}
 	
 
