@@ -3,17 +3,13 @@
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include "GameObject.h"
-#include <glm/glm.hpp>
-#include <GL/glew.h>
 #include <IL/il.h>
 #include <IL/ilu.h>
-#include "Transform.h"
 #include <vector>
-#include <memory>
-#include <string>
-
+#include <glm/glm.hpp>
 #include "BufferObject.h"
+#include "BoundingBox.h"
+
 
 class Mesh
 {
@@ -28,10 +24,13 @@ class Mesh
 
 	unsigned int texture_id = 0;
 
+	BoundingBox _boundingBox;
+
 public:
 
 	const auto& vertices() const { return _vertices; }
 	const auto& indices() const { return _indices; }
+	const auto& boundingBox() const { return _boundingBox; }
 
 	void load(const glm::vec3* vertices, size_t num_verts, unsigned int* indices, size_t num_indexs);
 	void loadTexCoords(const glm::vec2* tex_coords, size_t num_tex_coords);

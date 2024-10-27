@@ -22,6 +22,8 @@ public:
 	const auto& pos() const { return _pos; }
 	auto& pos() { return _pos; }
 
+	const auto* data() const { return &_mat[0][0]; }
+
 	void translate(const vec3& v);
 	void rotate(double rads, const vec3& v);
 

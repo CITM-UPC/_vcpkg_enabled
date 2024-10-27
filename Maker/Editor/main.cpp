@@ -34,7 +34,8 @@ static const auto FRAME_DT = 1.0s / FPS;
 using namespace std;
 
 static Camera camera;
-static Mesh mesh;
+
+static GameObject go;
 
 
 
@@ -71,7 +72,7 @@ static void display_func() {
 
 	drawFloorGrid(16, 0.25);
 
-	mesh.draw();
+	go.draw();
 
 }
 
@@ -94,7 +95,18 @@ static void mouseWheel_func(int wheel, int direction, int x, int y) {
 	camera.transform().translate(vec3(0, 0, direction * 0.1));
 }
 
+const char* checkFile(char* file)
+{
+	string filePath = file;
+	string extension;
 
+	extension = filePath[filePath.size() - 3] + filePath[filePath.size() - 2] + filePath[filePath.size() - 1];
+
+	const char* ext = extension.data();
+
+	return ext;
+	
+}
 
 int main(int argc, char* argv[]) {
 	// Iniit window and context
@@ -114,12 +126,13 @@ int main(int argc, char* argv[]) {
 	stream = aiGetPredefinedLogStream(aiDefaultLogStream_DEBUGGER, nullptr);
 	aiAttachLogStream(&stream);
 
-	// Init My Mesh
-	/*mesh.LoadFile("BakerHouse.fbx");
-	mesh.LoadTexture("Baker_house.png");*/
+	
+	
 	
 	SDL_Event event;
 	char* dropped_filePath;
+	auto mesh = make_shared<Mesh>();
+	auto imageTexture = make_shared<Image>();
 
 	while (window.processEvents() && window.isOpen()) {
 		const auto t0 = hrclock::now();
@@ -135,9 +148,16 @@ int main(int argc, char* argv[]) {
 			{
 			case SDL_DROPFILE:
 				dropped_filePath = event.drop.file;
-				mesh.LoadFile(dropped_filePath);
-				mesh.LoadTexture("Baker_house.png");
+				mesh->LoadFile(dropped_filePath);
+				
+				mesh->LoadTexture("Baker_house.png");
+				go.setMesh(mesh);
+				
+				
+				//go.setTextureImage(imageTexture);
 				SDL_free(dropped_filePath);
+				
+				
 				break;
 			}
 		}

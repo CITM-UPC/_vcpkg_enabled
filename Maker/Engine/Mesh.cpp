@@ -8,16 +8,21 @@ using namespace std;
 
 void Mesh::load(const glm::vec3* vertices, size_t num_verts, unsigned int* indices, size_t num_indexs)
 {
+	_vertices.assign(vertices, vertices + num_verts);
+	_indices.assign(indices, indices + num_indexs);
 	_vertices_buffer.loadData(vertices, num_verts * sizeof(glm::vec3));
 	_indices_buffer.loadIndices(indices, num_indexs);
 	_texCoords_buffer.unload();
 	_normals_buffer.unload();
 	_colors_buffer.unload();
 
-	_vertices.clear();
-	_indices.clear();
-	_vertices.assign(vertices, vertices + num_verts);
-	_indices.assign(indices, indices + num_indexs);
+	_boundingBox.min = _vertices.front();
+	_boundingBox.max = _vertices.front();
+
+	for (const auto& v : _vertices) {
+		_boundingBox.min = glm::min(_boundingBox.min, glm::dvec3(v));
+		_boundingBox.max = glm::max(_boundingBox.max, glm::dvec3(v));
+	}
 }
 
 void Mesh::loadTexCoords(const glm::vec2* tex_coords, size_t num_tex_coords)
