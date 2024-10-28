@@ -94,19 +94,20 @@ static void mouseButton_func(int button, int state, int x, int y) {
 	if (button == SDL_BUTTON_MIDDLE) {
 		middleMousePressed = (state == SDL_PRESSED);
 		if (middleMousePressed) {
-			lastMousePosition = ivec2(x, y); // Guardar la posición inicial del ratón
+			lastMousePosition = ivec2(x, y); 
 		}
 	}
 }
 
 static void mouseMotion_func(int x, int y) {
 	if (middleMousePressed) {
-		// Calcular el movimiento basado en la diferencia de la posición del ratón
+		
 		ivec2 delta = ivec2(x, y) - lastMousePosition;
 		lastMousePosition = ivec2(x, y);
 
-		// Mover la cámara basado en el movimiento del ratón
+		
 		camera.transform().translate(vec3(delta.x * 0.01, 0, -delta.y * 0.01));
+		camera.transform().translate(vec3(0, delta.y * 0.01, 0));
 	}
 }
 
