@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 using namespace std;
 #include "Engine/GameObject.h"
 #include <glm/glm.hpp>
@@ -22,6 +23,7 @@ using namespace std;
 #include "Engine/MyWindow.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <SDL2/SDL_events.h>
+
 
 using hrclock = chrono::high_resolution_clock;
 using u8vec4 = glm::u8vec4;
@@ -106,12 +108,17 @@ static void mouseMotion_func(int x, int y) {
 	}
 }
 
-const char* checkFile(char* file) {
-	string filePath = file;
-	string extension;
-	extension = filePath[filePath.size() - 3] + filePath[filePath.size() - 2] + filePath[filePath.size() - 1];
-	const char* ext = extension.data();
-	return ext;
+std::string getFileExtension(const std::string& filePath) {
+	// Find the last dot in the file path
+	size_t dotPosition = filePath.rfind('.');
+
+	// If no dot is found, return an empty string
+	if (dotPosition == std::string::npos) {
+		return "";
+	}
+
+	// Extract and return the file extension
+	return filePath.substr(dotPosition + 1);
 }
 
 int main(int argc, char* argv[]) {
@@ -128,6 +135,7 @@ int main(int argc, char* argv[]) {
 	char* dropped_filePath;
 	auto mesh = make_shared<Mesh>();
 	auto imageTexture = make_shared<Image>();
+	std::string extension;
 
 	while (window.processEvents() && window.isOpen()) {
 		const auto t0 = hrclock::now();
@@ -141,11 +149,21 @@ int main(int argc, char* argv[]) {
 			switch (event.type) {
 			case SDL_DROPFILE:
 				dropped_filePath = event.drop.file;
-				mesh->LoadFile(dropped_filePath);
-				imageTexture->LoadTexture("Baker_house.png");
-				go.setMesh(mesh);
-				go.setTextureImage(imageTexture);
+				extension = getFileExtension(dropped_filePath);
+
+				if (extension == "obj" || extension == "fbx" || extension == "dae") {
+					mesh->LoadFile(dropped_filePath);
+					go.setMesh(mesh);
+				}
+				else if (extension == "png" || extension == "jpg" || extension == "bmp") {
+					imageTexture->LoadTexture(dropped_filePath);
+					go.setTextureImage(imageTexture);
+				}
+				else {
+					std::cerr << "Unsupported file extension: " << extension << std::endl;
+				}
 				SDL_free(dropped_filePath);
+				
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:

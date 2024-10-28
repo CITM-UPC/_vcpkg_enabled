@@ -163,33 +163,7 @@ void Mesh::LoadFile(const char* file_path)
 	}
 }
 
-void Mesh::LoadTexture(const std::string& path)
-{
-	auto img = ilGenImage();
-	ilBindImage(img);
-	ilLoadImage((const wchar_t*)path.c_str());
-	auto width = ilGetInteger(IL_IMAGE_WIDTH);
 
-	auto height = ilGetInteger(IL_IMAGE_HEIGHT);
-
-	auto channels = ilGetInteger(IL_IMAGE_CHANNELS);
-	auto data = ilGetData();
-
-	//load image as a texture in VRAM
-	texture_id = _texCoords_buffer.id();
-	glGenTextures(1, &texture_id);
-	glBindTexture(GL_TEXTURE_2D, texture_id);
-	glTexImage2D(GL_TEXTURE_2D, 0, channels, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	//now we can delete image from RAM
-	ilDeleteImage(img);
-}
 
 
 

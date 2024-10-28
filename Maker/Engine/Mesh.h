@@ -50,9 +50,7 @@ public:
 	//
 	void CheckerTexture();
 
-	// Load Texture
-	void LoadTexture(const std::string& path);
-
+	
 	
 
 };
