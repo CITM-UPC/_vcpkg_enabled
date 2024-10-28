@@ -9,6 +9,8 @@ using namespace std;
 #include <IL/ilu.h>
 #include <IL/ilut.h>
 #include <imgui.h>
+#include <imgui_impl_sdl2.h>
+#include <imgui_impl_opengl3.h>
 #include <assimp/Importer.hpp>
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
@@ -20,7 +22,7 @@ using namespace std;
 #include <chrono>
 #include <thread>
 #include <exception>
-#include "Engine/MyWindow.h"
+#include "MyWindow.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <SDL2/SDL_events.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -150,19 +152,20 @@ static void mouseButton_func(int button, int state, int x, int y) {
 	if (button == SDL_BUTTON_MIDDLE) {
 		middleMousePressed = (state == SDL_PRESSED);
 		if (middleMousePressed) {
-			lastMousePosition = ivec2(x, y); // Guardar la posición inicial del ratón
+			lastMousePosition = ivec2(x, y); 
 		}
 	}
 }
 
 static void mouseMotion_func(int x, int y) {
 	if (middleMousePressed) {
-		// Calcular el movimiento basado en la diferencia de la posición del ratón
+		
 		ivec2 delta = ivec2(x, y) - lastMousePosition;
 		lastMousePosition = ivec2(x, y);
 
-		// Mover la cámara basado en el movimiento del ratón
+		
 		camera.transform().translate(vec3(delta.x * 0.01, 0, -delta.y * 0.01));
+		camera.transform().translate(vec3(0, delta.y * 0.01, 0));
 	}
 }
 
