@@ -225,7 +225,11 @@ int main(int argc, char* argv[]) {
 		const auto dt = t1 - t0;
 		if (dt < FRAME_DT) this_thread::sleep_for(FRAME_DT - dt);
 
-		while (SDL_PollEvent(&event)) {
+		while (SDL_PollEvent(&event))
+		{
+			gui.processEvent(event);
+			window.processEvents(&gui);
+			
 			switch (event.type) {
 			case SDL_DROPFILE:
 				dropped_filePath = event.drop.file;
@@ -247,7 +251,7 @@ int main(int argc, char* argv[]) {
 					std::cerr << "Unsupported file extension: " << extension << std::endl;
 				}
 				SDL_free(dropped_filePath);
-				
+
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:
@@ -262,6 +266,8 @@ int main(int argc, char* argv[]) {
 				break;
 			}
 		}
+
+		
 	}
 
 	return EXIT_SUCCESS;
