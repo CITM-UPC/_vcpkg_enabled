@@ -144,7 +144,8 @@ static void reshape_func(int width, int height) {
 	glLoadMatrixd(&camera.projection()[0][0]);
 }
 
-static void mouseWheel_func(int wheel, int direction, int x, int y) {
+static void mouseWheel_func(int direction) {
+	// Mueve la cámara hacia adelante o hacia atrás
 	camera.transform().translate(vec3(0, 0, direction * 0.1));
 }
 
@@ -251,6 +252,10 @@ int main(int argc, char* argv[]) {
 				break;
 			case SDL_MOUSEMOTION:
 				mouseMotion_func(event.motion.x, event.motion.y);
+				break;
+
+			case SDL_MOUSEWHEEL:
+				mouseWheel_func(event.wheel.y);
 				break;
 			}
 		}
