@@ -4,6 +4,8 @@
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_opengl3.h>
+#include <tinyfiledialogs/tinyfiledialogs.h> 
+
 
 MyGUI::MyGUI(SDL_Window* window, void* context) {
 	IMGUI_CHECKVERSION();
@@ -28,10 +30,27 @@ void MyGUI::render() {
 	ImGui::NewFrame();
 	if (ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("File")) {
-			if (ImGui::MenuItem("New")) {
+			if (ImGui::MenuItem("Import FBX")) {
+				// Open file dialog to select an FBX file
+				const char* filterPatterns[1] = { "*.fbx" };
+				const char* filePath = tinyfd_openFileDialog(
+					"Select an FBX file",
+					"",
+					1,
+					filterPatterns,
+					NULL,
+					0
+				);
+				if (filePath) {
+					// Handle the selected file path
+					// For example, you can load the FBX file here
+					// loadFBX(filePath);
+				}
 			}
+			ImGui::EndMenu(); // Close the "File" menu
 		}
-	}ImGui::EndMainMenuBar();
+		ImGui::EndMainMenuBar(); // Close the main menu bar
+	}
 	ImGui::ShowDemoWindow();
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

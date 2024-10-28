@@ -233,6 +233,13 @@ int main(int argc, char* argv[]) {
 			switch (event.type) {
 			case SDL_DROPFILE:
 				dropped_filePath = event.drop.file;
+				//Idealmente que a partir de aquí esto sea una función
+				//Es más, a lo mejor debería ser una clase que se encargue de manejar los archivos
+				//Por ejemplo, un FileManager
+				//Como ejemplo, "FileManager::LoadFile(dropped_filePath)"
+				//Y que se genere un nuevo GameObject con el archivo cargado, añadiendo el GameObject a una lista de GameObjects
+				//Eso estaría muy guay porque podríamos tener una lista de GameObjects y poder verla en la GUI
+				//Joder Copilot me quitas las palabras de la boca
 				extension = getFileExtension(dropped_filePath);
 
 				if (extension == "obj" || extension == "fbx" || extension == "dae") {
@@ -251,7 +258,7 @@ int main(int argc, char* argv[]) {
 					std::cerr << "Unsupported file extension: " << extension << std::endl;
 				}
 				SDL_free(dropped_filePath);
-
+				//Hasta aquí
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:
