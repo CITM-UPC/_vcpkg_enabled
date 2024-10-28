@@ -9,6 +9,8 @@ using namespace std;
 #include <IL/ilu.h>
 #include <IL/ilut.h>
 #include <imgui.h>
+#include <imgui_impl_sdl2.h>
+#include <imgui_impl_opengl3.h>
 #include <assimp/Importer.hpp>
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
@@ -20,7 +22,7 @@ using namespace std;
 #include <chrono>
 #include <thread>
 #include <exception>
-#include "Engine/MyWindow.h"
+#include "MyWindow.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <SDL2/SDL_events.h>
 
