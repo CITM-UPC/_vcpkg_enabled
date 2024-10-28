@@ -26,7 +26,13 @@ void MyGUI::render() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
-	ImGui::ShowDemoWindow();
+	if (ImGui::BeginMainMenuBar()) {
+		if (ImGui::BeginMenu("File")) {
+			if (ImGui::MenuItem("New")) {
+			}
+		}
+	}ImGui::EndMainMenuBar();
+	//ImGui::ShowDemoWindow();
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

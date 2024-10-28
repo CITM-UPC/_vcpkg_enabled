@@ -23,6 +23,7 @@ using namespace std;
 #include <thread>
 #include <exception>
 #include "MyWindow.h"
+#include "MyGUI.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <SDL2/SDL_events.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -203,6 +204,7 @@ int main(int argc, char* argv[]) {
 	iluInit();
 	ilutInit();
 	MyWindow window("SDL2 Simple Example", WINDOW_SIZE.x, WINDOW_SIZE.y);
+	MyGUI gui(window.windowPtr(), window.contextPtr());
 	init_opengl();
 
 	camera.transform().pos() = vec3(0, 1, 4);
@@ -214,9 +216,10 @@ int main(int argc, char* argv[]) {
 	auto imageTexture = make_shared<Image>();
 	std::string extension;
 
-	while (window.processEvents() && window.isOpen()) {
+	while (window.processEvents(&gui) && window.isOpen()) {
 		const auto t0 = hrclock::now();
 		display_func();
+		gui.render();
 		window.swapBuffers();
 		const auto t1 = hrclock::now();
 		const auto dt = t1 - t0;
