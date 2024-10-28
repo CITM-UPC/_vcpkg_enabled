@@ -2,6 +2,7 @@
 #include <memory>
 #include "Image.h"
 
+
 class Texture
 {
 public:
@@ -19,5 +20,6 @@ public:
 	void bind() const;
 	void setImage(const std::shared_ptr<Image>& img_ptr) { _img_ptr = img_ptr; }
 	const auto& image() const { return *_img_ptr; }
+	
 };
 

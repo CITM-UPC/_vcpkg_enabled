@@ -149,9 +149,10 @@ int main(int argc, char* argv[]) {
 			case SDL_DROPFILE:
 				dropped_filePath = event.drop.file;
 				mesh->LoadFile(dropped_filePath);
+				imageTexture->LoadTexture("Baker_house.png");
 				
-				mesh->LoadTexture("Baker_house.png");
 				go.setMesh(mesh);
+				go.setTextureImage(imageTexture);
 				
 				
 				//go.setTextureImage(imageTexture);

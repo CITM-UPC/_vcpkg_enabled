@@ -9,6 +9,8 @@
 #include <glm/glm.hpp>
 #include "BufferObject.h"
 #include "BoundingBox.h"
+#include "MeshLoader.h"
+
 
 
 class Mesh
@@ -26,11 +28,16 @@ class Mesh
 
 	BoundingBox _boundingBox;
 
+	//MeshLoader* _meshLoader;
+
 public:
+
+	Mesh();
 
 	const auto& vertices() const { return _vertices; }
 	const auto& indices() const { return _indices; }
 	const auto& boundingBox() const { return _boundingBox; }
+	//const auto& meshLoader() const { return *_meshLoader; }
 
 	void load(const glm::vec3* vertices, size_t num_verts, unsigned int* indices, size_t num_indexs);
 	void loadTexCoords(const glm::vec2* tex_coords, size_t num_tex_coords);
@@ -38,8 +45,7 @@ public:
 	void loadColors(const glm::u8vec3* colors, size_t num_colors);
 	void draw() const;
 
-	// Load Meshes from a file
-	void LoadFile(const char* file_path);
+	void LoadFile(const char* filePath);
 
 	//
 	void CheckerTexture();
