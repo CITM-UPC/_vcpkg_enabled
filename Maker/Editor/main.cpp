@@ -23,6 +23,8 @@ using namespace std;
 #include "Engine/MyWindow.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <SDL2/SDL_events.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 
 using hrclock = chrono::high_resolution_clock;
@@ -35,10 +37,66 @@ static const unsigned int FPS = 60;
 static const auto FRAME_DT = 1.0s / FPS;
 
 static Camera camera;
+glm::dmat4 projectionMatrix;
+glm::dmat4 viewMatrix;
+
 static GameObject go;
 
 static bool middleMousePressed = false;
 static ivec2 lastMousePosition;
+
+// Function to convert screen coordinates to world coordinates
+glm::vec3 screenToWorldRay(int mouseX, int mouseY, int screenWidth, int screenHeight, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
+	// Normalize mouse coordinates to [-1, 1]
+	float x = (2.0f * mouseX) / screenWidth - 1.0f;
+	float y = 1.0f - (2.0f * mouseY) / screenHeight;
+	float z = 1.0f;
+	glm::vec3 ray_nds = glm::vec3(x, y, z);
+
+	// Convert to homogeneous clip coordinates
+	glm::vec4 ray_clip = glm::vec4(ray_nds, 1.0);
+
+	// Convert to eye coordinates
+	glm::vec4 ray_eye = glm::inverse(projectionMatrix) * ray_clip;
+	ray_eye = glm::vec4(ray_eye.x, ray_eye.y, -1.0, 0.0);
+
+	// Convert to world coordinates
+	glm::vec3 ray_wor = glm::vec3(glm::inverse(viewMatrix) * ray_eye);
+	ray_wor = glm::normalize(ray_wor);
+
+	return ray_wor;
+}
+
+bool rayIntersectsBoundingBox(const glm::vec3& rayOrigin, const glm::vec3& rayDir, const BoundingBox& bbox) {
+	float tmin = (bbox.min.x - rayOrigin.x) / rayDir.x;
+	float tmax = (bbox.max.x - rayOrigin.x) / rayDir.x;
+
+	if (tmin > tmax) std::swap(tmin, tmax);
+
+	float tymin = (bbox.min.y - rayOrigin.y) / rayDir.y;
+	float tymax = (bbox.max.y - rayOrigin.y) / rayDir.y;
+
+	if (tymin > tymax) std::swap(tymin, tymax);
+
+	if ((tmin > tymax) || (tymin > tmax))
+		return false;
+
+	if (tymin > tmin)
+		tmin = tymin;
+
+	if (tymax < tmax)
+		tmax = tymax;
+
+	float tzmin = (bbox.min.z - rayOrigin.z) / rayDir.z;
+	float tzmax = (bbox.max.z - rayOrigin.z) / rayDir.z;
+
+	if (tzmin > tzmax) std::swap(tzmin, tzmax);
+
+	if ((tmin > tzmax) || (tzmin > tmax))
+		return false;
+
+	return true;
+}
 
 static void drawFloorGrid(int size, double step) {
 	glBegin(GL_LINES);
@@ -52,8 +110,8 @@ static void drawFloorGrid(int size, double step) {
 }
 
 void configureCamera() {
-	glm::dmat4 projectionMatrix = camera.projection();
-	glm::dmat4 viewMatrix = camera.view();
+	projectionMatrix = camera.projection();
+	viewMatrix = camera.view();
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixd(glm::value_ptr(projectionMatrix));
@@ -121,6 +179,21 @@ std::string getFileExtension(const std::string& filePath) {
 	return filePath.substr(dotPosition + 1);
 }
 
+// Function to check if the mouse is over a GameObject
+bool isMouseOverGameObject(const GameObject& go, int mouseX, int mouseY) {
+	// Obtener la posición de la cámara (origen del rayo)
+	glm::vec3 rayOrigin = camera.transform().pos();
+
+	// Convertir las coordenadas del mouse a un rayo en el espacio del mundo
+	glm::vec3 rayDir = screenToWorldRay(mouseX, mouseY, WINDOW_SIZE.x, WINDOW_SIZE.y, viewMatrix, projectionMatrix);
+
+	// Obtener el bounding box del GameObject
+	BoundingBox bbox = go.boundingBox();
+
+	// Verificar si el rayo intersecta con el bounding box
+	return rayIntersectsBoundingBox(rayOrigin, rayDir, bbox);
+}
+
 int main(int argc, char* argv[]) {
 	ilInit();
 	iluInit();
@@ -156,8 +229,12 @@ int main(int argc, char* argv[]) {
 					go.setMesh(mesh);
 				}
 				else if (extension == "png" || extension == "jpg" || extension == "bmp") {
-					imageTexture->LoadTexture(dropped_filePath);
-					go.setTextureImage(imageTexture);
+					int mouseX, mouseY;
+					SDL_GetMouseState(&mouseX, &mouseY);
+					if (isMouseOverGameObject(go, mouseX, mouseY)) {
+						imageTexture->LoadTexture(dropped_filePath);
+						go.setTextureImage(imageTexture);
+					}
 				}
 				else {
 					std::cerr << "Unsupported file extension: " << extension << std::endl;
