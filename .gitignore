@@ -364,3 +364,4 @@ FodyWeavers.xsd
 
 # Installed packages
 /vcpkg_installed
+/Maker/Editor/imgui.ini
