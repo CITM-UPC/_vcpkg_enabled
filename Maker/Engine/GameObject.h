@@ -34,6 +34,8 @@ public:
 	bool hasTexture() const { return _texture.id(); }
 	bool hasMesh() const { return _mesh_ptr != nullptr; }
 
+	
+
 	void draw() const;
 };
 

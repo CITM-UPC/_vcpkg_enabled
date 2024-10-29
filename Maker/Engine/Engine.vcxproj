@@ -49,6 +49,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -75,6 +76,7 @@
     <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="BufferObject.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="FileManager.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Mesh.h" />
@@ -89,6 +91,7 @@
     <ClCompile Include="BoundingBox.cpp" />
     <ClCompile Include="BufferObject.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FileManager.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="Mesh.cpp" />

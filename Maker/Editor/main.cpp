@@ -27,7 +27,7 @@ using namespace std;
 #include <glm/gtc/type_ptr.hpp>
 #include <SDL2/SDL_events.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+
 
 
 using hrclock = chrono::high_resolution_clock;
@@ -43,7 +43,7 @@ static Camera camera;
 glm::dmat4 projectionMatrix;
 glm::dmat4 viewMatrix;
 
-static GameObject go;
+static GameObject scene;
 
 static bool middleMousePressed = false;
 static ivec2 lastMousePosition;
@@ -127,7 +127,12 @@ static void display_func() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	configureCamera();
 	drawFloorGrid(16, 0.25);
-	go.draw();
+	
+	for (int i = 0; i < scene.children().size(); i++)
+	{
+		// Comentar esto para ejecutar
+		scene.children()[i].draw();
+	}
 }
 
 static void init_opengl() {
@@ -233,26 +238,27 @@ int main(int argc, char* argv[]) {
 			switch (event.type) {
 			case SDL_DROPFILE:
 				dropped_filePath = event.drop.file;
-				//Idealmente que a partir de aquí esto sea una función
-				//Es más, a lo mejor debería ser una clase que se encargue de manejar los archivos
-				//Por ejemplo, un FileManager
-				//Como ejemplo, "FileManager::LoadFile(dropped_filePath)"
-				//Y que se genere un nuevo GameObject con el archivo cargado, añadiendo el GameObject a una lista de GameObjects
-				//Eso estaría muy guay porque podríamos tener una lista de GameObjects y poder verla en la GUI
-				//Joder Copilot me quitas las palabras de la boca
 				extension = getFileExtension(dropped_filePath);
 
 				if (extension == "obj" || extension == "fbx" || extension == "dae") {
 					mesh->LoadFile(dropped_filePath);
-					go.setMesh(mesh);
+					GameObject go;
+					scene.emplaceChild(go);
 				}
 				else if (extension == "png" || extension == "jpg" || extension == "bmp") {
 					int mouseX, mouseY;
 					SDL_GetMouseState(&mouseX, &mouseY);
-					if (isMouseOverGameObject(go, mouseX, mouseY)) {
-						imageTexture->LoadTexture(dropped_filePath);
-						go.setTextureImage(imageTexture);
+					// Comentar esto para ejecutar
+					for (int i = 0; i < scene.children().size(); i++)
+					{
+						GameObject& child = scene.children()[i];
+						if (isMouseOverGameObject(child, mouseX, mouseY)) {
+							imageTexture->LoadTexture(dropped_filePath);
+							child.setTextureImage(imageTexture);
+						}
 					}
+					//Hasta aquí
+					
 				}
 				else {
 					std::cerr << "Unsupported file extension: " << extension << std::endl;
