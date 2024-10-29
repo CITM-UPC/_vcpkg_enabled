@@ -47,6 +47,9 @@ static GameObject scene;
 
 static bool middleMousePressed = false;
 static ivec2 lastMousePosition;
+static bool rightMousePressed = false;
+static const double moveSpeed = 0.1;
+
 
 // Function to convert screen coordinates to world coordinates
 glm::vec3 screenToWorldRay(int mouseX, int mouseY, int screenWidth, int screenHeight, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
@@ -130,8 +133,8 @@ static void display_func() {
 	
 	for (int i = 0; i < scene.children().size(); i++)
 	{
-		// Comentar esto para ejecutar
-		scene.children()[i].draw();
+		//// Comentar esto para ejecutar
+		//scene.children()[i].draw();
 	}
 }
 
@@ -163,7 +166,36 @@ static void mouseButton_func(int button, int state, int x, int y) {
 		}
 	}
 }
+static void mouseRightButton_func(int button, int state, int x, int y) {
+	if (button == SDL_BUTTON_RIGHT) {
+		rightMousePressed = (state == SDL_PRESSED);
+	}
+}
 
+static void handleKeyboardInput() {
+	const Uint8* state = SDL_GetKeyboardState(NULL);
+	if (rightMousePressed) {
+
+		if (state[SDL_SCANCODE_W]) {
+			camera.transform().translate(glm::vec3(0, 0, moveSpeed));
+		}
+		if (state[SDL_SCANCODE_S]) {
+			camera.transform().translate(glm::vec3(0, 0, -moveSpeed));
+		}
+		if (state[SDL_SCANCODE_A]) {
+			camera.transform().translate(glm::vec3(-moveSpeed, 0, 0));
+		}
+		if (state[SDL_SCANCODE_D]) {
+			camera.transform().translate(glm::vec3(moveSpeed, 0, 0));
+		}
+		if (state[SDL_SCANCODE_E]) {
+			camera.transform().translate(glm::vec3(0, -moveSpeed, 0));
+		}
+		if (state[SDL_SCANCODE_Q]) {
+			camera.transform().translate(glm::vec3(0, moveSpeed, 0));
+		}
+	}
+}
 static void mouseMotion_func(int x, int y) {
 	if (middleMousePressed) {
 		
@@ -223,6 +255,7 @@ int main(int argc, char* argv[]) {
 
 	while (window.processEvents(&gui) && window.isOpen()) {
 		const auto t0 = hrclock::now();
+		handleKeyboardInput();
 		display_func();
 		gui.render();
 		window.swapBuffers();
@@ -248,16 +281,16 @@ int main(int argc, char* argv[]) {
 				else if (extension == "png" || extension == "jpg" || extension == "bmp") {
 					int mouseX, mouseY;
 					SDL_GetMouseState(&mouseX, &mouseY);
-					// Comentar esto para ejecutar
-					for (int i = 0; i < scene.children().size(); i++)
-					{
-						GameObject& child = scene.children()[i];
-						if (isMouseOverGameObject(child, mouseX, mouseY)) {
-							imageTexture->LoadTexture(dropped_filePath);
-							child.setTextureImage(imageTexture);
-						}
-					}
-					//Hasta aquí
+					//// Comentar esto para ejecutar
+					//for (int i = 0; i < scene.children().size(); i++)
+					//{
+					//	GameObject& child = scene.children()[i];
+					//	if (isMouseOverGameObject(child, mouseX, mouseY)) {
+					//		imageTexture->LoadTexture(dropped_filePath);
+					//		child.setTextureImage(imageTexture);
+					//	}
+					//}
+					////Hasta aquí
 					
 				}
 				else {
@@ -267,6 +300,8 @@ int main(int argc, char* argv[]) {
 				//Hasta aquí
 				break;
 			case SDL_MOUSEBUTTONDOWN:
+				mouseRightButton_func(event.button.button, event.button.state, event.button.x, event.button.y);
+				break;
 			case SDL_MOUSEBUTTONUP:
 				mouseButton_func(event.button.button, event.button.state, event.button.x, event.button.y);
 				break;
