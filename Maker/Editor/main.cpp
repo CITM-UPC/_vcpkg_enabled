@@ -133,6 +133,7 @@ static void display_func() {
 	
 	for (auto& child : scene.children()) {
 		child.draw();
+		child.transform().translate(glm::vec3(0, 0.001, 0));
 	}
 
 	cout << "Number of children: " << scene.children().size() << endl;
@@ -238,10 +239,7 @@ bool isMouseOverGameObject(const GameObject& go, int mouseX, int mouseY) {
 }
 
 int main(int argc, char* argv[]) {
-	/*if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
-		std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
-		return EXIT_FAILURE;
-	}*/
+	
 	
 	ilInit();
 	iluInit();
