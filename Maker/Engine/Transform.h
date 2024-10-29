@@ -26,6 +26,6 @@ public:
 
 	void translate(const vec3& v);
 	void rotate(double rads, const vec3& v);
-
+	void lookAt(const vec3& target);
 };
 
