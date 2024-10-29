@@ -1,6 +1,9 @@
 #pragma once
 
 #include "MyWindow.h"
+#include <list>
+#include <string>
+using namespace std;
 
 class MyGUI : public IEventProcessor
 {
@@ -11,7 +14,7 @@ public:
 	MyGUI& operator=(const MyGUI&) = delete;
 	~MyGUI();
 	void render();
-
+	list<string> _objects;
 	void processEvent(const SDL_Event& event) override;
 
 };

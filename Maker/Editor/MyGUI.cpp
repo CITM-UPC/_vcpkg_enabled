@@ -1,11 +1,11 @@
 #include "MyGUI.h"
+#include "Engine/FileManager.h"
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_opengl.h>
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_opengl3.h>
 #include <tinyfiledialogs/tinyfiledialogs.h> 
-
 
 MyGUI::MyGUI(SDL_Window* window, void* context) {
 	IMGUI_CHECKVERSION();
@@ -28,6 +28,7 @@ void MyGUI::render() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
+	
 	if (ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("File")) {
 			if (ImGui::MenuItem("Import FBX")) {
@@ -42,6 +43,22 @@ void MyGUI::render() {
 					0
 				);
 				if (filePath) {
+					std::string file = filePath;
+					file = file.substr(file.find_last_of("\\") + 1);
+					
+					// Remove .fbx extension
+					if (file.size() > 4 && file.substr(file.size() - 4) == ".fbx") {
+						file = file.substr(0, file.size() - 4);
+					}
+					
+					// Ensure unique name
+					std::string uniqueFile = file;
+					int counter = 1;
+					while (std::find(_objects.begin(), _objects.end(), uniqueFile) != _objects.end()) {
+						uniqueFile = file + "(" + std::to_string(counter++) + ")";
+					}
+					
+					_objects.push_back(uniqueFile);
 					// Handle the selected file path
 					// For example, you can load the FBX file here
 					// loadFBX(filePath);
@@ -51,7 +68,20 @@ void MyGUI::render() {
 		}
 		ImGui::EndMainMenuBar(); // Close the main menu bar
 	}
-	ImGui::ShowDemoWindow();
+	ImGui::SetNextWindowSize(ImVec2(300, 700), ImGuiCond_Always);
+	ImGui::SetNextWindowPos(ImVec2(0, 20), ImGuiCond_Always);
+	if (ImGui::Begin("Gameobjects", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
+		for (auto& object : _objects) {
+			if (ImGui::Selectable(object.c_str())) {
+				// Handle the selection of the game object
+				// For example, you can set the selected object as active
+				// setActiveObject(object);
+			}
+		}
+		// Add your GUI elements here
+	}
+	ImGui::End();
+	//ImGui::ShowDemoWindow();
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
