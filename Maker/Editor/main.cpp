@@ -181,10 +181,10 @@ static void handleKeyboardInput() {
 			camera.transform().translate(glm::vec3(0, 0, -moveSpeed));
 		}
 		if (state[SDL_SCANCODE_A]) {
-			camera.transform().translate(glm::vec3(-moveSpeed, 0, 0));
+			camera.transform().translate(glm::vec3(moveSpeed, 0, 0));
 		}
 		if (state[SDL_SCANCODE_D]) {
-			camera.transform().translate(glm::vec3(moveSpeed, 0, 0));
+			camera.transform().translate(glm::vec3(-moveSpeed, 0, 0));
 		}
 		if (state[SDL_SCANCODE_E]) {
 			camera.transform().translate(glm::vec3(0, -moveSpeed, 0));
