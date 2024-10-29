@@ -134,6 +134,8 @@ static void display_func() {
 	for (auto& child : scene.children()) {
 		child.draw();
 	}
+
+	cout << "Number of children: " << scene.children().size() << endl;
 }
 
 static void init_opengl() {
@@ -269,12 +271,10 @@ int main(int argc, char* argv[]) {
 		const auto dt = t1 - t0;
 		if (dt < FRAME_DT) this_thread::sleep_for(FRAME_DT - dt);
 
-		
-
 		while (SDL_PollEvent(&event))
 		{
 			gui.processEvent(event);
-			window.processEvents(&gui);
+			//window.processEvents(&gui);
 			
 			switch (event.type) {
 				case SDL_DROPFILE:
@@ -284,6 +284,7 @@ int main(int argc, char* argv[]) {
 					if (extension == "obj" || extension == "fbx" || extension == "dae") {
 						mesh->LoadFile(dropped_filePath);
 						GameObject go;
+						go.setMesh(mesh);
 						scene.emplaceChild(go);
 					}
 					else if (extension == "png" || extension == "jpg" || extension == "bmp") {
