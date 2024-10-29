@@ -48,7 +48,7 @@ static GameObject scene;
 static bool middleMousePressed = false;
 static ivec2 lastMousePosition;
 static bool rightMousePressed = false;
-static const double moveSpeed = 0.1;
+static double moveSpeed = 0.1;
 
 
 // Function to convert screen coordinates to world coordinates
@@ -193,6 +193,9 @@ static void handleKeyboardInput() {
 		}
 		if (state[SDL_SCANCODE_Q]) {
 			camera.transform().translate(glm::vec3(0, moveSpeed, 0));
+		}
+		if (state[SDL_SCANCODE_LSHIFT]) {
+			moveSpeed *= 2;
 		}
 	}
 }
