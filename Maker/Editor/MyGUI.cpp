@@ -113,16 +113,6 @@ void MyGUI::render() {
                 _isRenaming = false;
                 _selectedObjectIndex = -1; // Deselect the object after canceling
             }
-            if (ImGui::Button("Save")) {
-                _objects[_selectedObjectIndex] = _renameBuffer;
-                _isRenaming = false;
-                _selectedObjectIndex = -1; // Deselect the object after renaming
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Cancel")) {
-                _isRenaming = false;
-                _selectedObjectIndex = -1; // Deselect the object after canceling
-            }
             ImGui::End();
         }
     }
@@ -131,6 +121,9 @@ void MyGUI::render() {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
+
+
+
 
 
 
