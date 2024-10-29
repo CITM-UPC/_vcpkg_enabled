@@ -91,6 +91,7 @@
     <ClCompile Include="BoundingBox.cpp" />
     <ClCompile Include="BufferObject.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CreateGameObject.cpp" />
     <ClCompile Include="FileManager.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Image.cpp" />

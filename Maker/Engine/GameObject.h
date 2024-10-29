@@ -34,7 +34,11 @@ public:
 	bool hasTexture() const { return _texture.id(); }
 	bool hasMesh() const { return _mesh_ptr != nullptr; }
 
-	
+	// Basic Shapes
+	static std::shared_ptr<GameObject> createCube();
+	static std::shared_ptr<GameObject> createSphere();
+	static std::shared_ptr<GameObject> createCylinder();
+
 
 	void draw() const;
 };
