@@ -131,10 +131,8 @@ static void display_func() {
 	configureCamera();
 	drawFloorGrid(16, 0.25);
 	
-	for (int i = 0; i < scene.children().size(); i++)
-	{
-		//// Comentar esto para ejecutar
-		//scene.children()[i].draw();
+	for (auto& child : scene.children()) {
+		child.draw();
 	}
 }
 
@@ -240,6 +238,11 @@ bool isMouseOverGameObject(const GameObject& go, int mouseX, int mouseY) {
 }
 
 int main(int argc, char* argv[]) {
+	/*if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
+		std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
+		return EXIT_FAILURE;
+	}*/
+	
 	ilInit();
 	iluInit();
 	ilutInit();
@@ -256,6 +259,8 @@ int main(int argc, char* argv[]) {
 	auto imageTexture = make_shared<Image>();
 	std::string extension;
 
+	SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
+
 	while (window.processEvents(&gui) && window.isOpen()) {
 		const auto t0 = hrclock::now();
 		handleKeyboardInput();
@@ -266,55 +271,53 @@ int main(int argc, char* argv[]) {
 		const auto dt = t1 - t0;
 		if (dt < FRAME_DT) this_thread::sleep_for(FRAME_DT - dt);
 
+		
+
 		while (SDL_PollEvent(&event))
 		{
 			gui.processEvent(event);
 			window.processEvents(&gui);
 			
 			switch (event.type) {
-			case SDL_DROPFILE:
-				dropped_filePath = event.drop.file;
-				extension = getFileExtension(dropped_filePath);
+				case SDL_DROPFILE:
+					dropped_filePath = event.drop.file;
+					extension = getFileExtension(dropped_filePath);
 
-				if (extension == "obj" || extension == "fbx" || extension == "dae") {
-					mesh->LoadFile(dropped_filePath);
-					GameObject go;
-					scene.emplaceChild(go);
-				}
-				else if (extension == "png" || extension == "jpg" || extension == "bmp") {
-					int mouseX, mouseY;
-					SDL_GetMouseState(&mouseX, &mouseY);
-					//// Comentar esto para ejecutar
-					//for (int i = 0; i < scene.children().size(); i++)
-					//{
-					//	GameObject& child = scene.children()[i];
-					//	if (isMouseOverGameObject(child, mouseX, mouseY)) {
-					//		imageTexture->LoadTexture(dropped_filePath);
-					//		child.setTextureImage(imageTexture);
-					//	}
-					//}
-					////Hasta aquí
-					
-				}
-				else {
-					std::cerr << "Unsupported file extension: " << extension << std::endl;
-				}
-				SDL_free(dropped_filePath);
-				//Hasta aquí
-				break;
-			case SDL_MOUSEBUTTONDOWN:
-				mouseRightButton_func(event.button.button, event.button.state, event.button.x, event.button.y);
-				break;
-			case SDL_MOUSEBUTTONUP:
-				mouseButton_func(event.button.button, event.button.state, event.button.x, event.button.y);
-				break;
-			case SDL_MOUSEMOTION:
-				mouseMotion_func(event.motion.x, event.motion.y);
-				break;
+					if (extension == "obj" || extension == "fbx" || extension == "dae") {
+						mesh->LoadFile(dropped_filePath);
+						GameObject go;
+						scene.emplaceChild(go);
+					}
+					else if (extension == "png" || extension == "jpg" || extension == "bmp") {
+						int mouseX, mouseY;
+						SDL_GetMouseState(&mouseX, &mouseY);
+						for (auto& child : scene.children()) {
+							if (isMouseOverGameObject(child, mouseX, mouseY)) {
+								imageTexture->LoadTexture(dropped_filePath);
+								child.setTextureImage(imageTexture);
+							}
+						}
+						
+					}
+					else {
+						std::cerr << "Unsupported file extension: " << extension << std::endl;
+					}
+					SDL_free(dropped_filePath);
+					//Hasta aquí
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					mouseRightButton_func(event.button.button, event.button.state, event.button.x, event.button.y);
+					break;
+				case SDL_MOUSEBUTTONUP:
+					mouseButton_func(event.button.button, event.button.state, event.button.x, event.button.y);
+					break;
+				case SDL_MOUSEMOTION:
+					mouseMotion_func(event.motion.x, event.motion.y);
+					break;
 
-			case SDL_MOUSEWHEEL:
-				mouseWheel_func(event.wheel.y);
-				break;
+				case SDL_MOUSEWHEEL:
+					mouseWheel_func(event.wheel.y);
+					break;
 			}
 		}
 
