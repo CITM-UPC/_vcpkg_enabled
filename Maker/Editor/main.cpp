@@ -163,8 +163,6 @@ static void mouseButton_func(int button, int state, int x, int y) {
 			lastMousePosition = ivec2(x, y); 
 		}
 	}
-}
-static void mouseRightButton_func(int button, int state, int x, int y) {
 	if (button == SDL_BUTTON_RIGHT) {
 		rightMousePressed = (state == SDL_PRESSED);
 	}
@@ -306,8 +304,7 @@ int main(int argc, char* argv[]) {
 					//Hasta aquí
 					break;
 				case SDL_MOUSEBUTTONDOWN:
-					mouseRightButton_func(event.button.button, event.button.state, event.button.x, event.button.y);
-					break;
+					
 				case SDL_MOUSEBUTTONUP:
 					mouseButton_func(event.button.button, event.button.state, event.button.x, event.button.y);
 					break;
