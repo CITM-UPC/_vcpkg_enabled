@@ -60,6 +60,9 @@ void MyGUI::render() {
                     // loadFBX(filePath);
                 }
             }
+            if (ImGui::MenuItem("Quit")) {
+				SDL_Quit();
+            }
             ImGui::EndMenu(); // Close the "File" menu
 
         }
