@@ -8,9 +8,13 @@ void GameObject::draw() const {
 	glMultMatrixd(_transform.data());
 	glColor3ubv(&_color.r);
 
-	if (hasTexture()) {
+	if (hasTexture() && drawTexture) {
 		glEnable(GL_TEXTURE_2D);
 		_texture.bind();
+	}
+	else if (!hasTexture() || !drawTexture)
+	{
+		_mesh_ptr->CheckerTexture();
 	}
 
 	if (hasMesh()) _mesh_ptr->draw();
