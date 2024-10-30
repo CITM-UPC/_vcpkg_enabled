@@ -26,7 +26,7 @@ MyGUI::~MyGUI() {
 
 
 
-
+FileManager fileManager;
 // MyGUI.cpp
 
 void MyGUI::render() {
@@ -48,22 +48,9 @@ void MyGUI::render() {
                     0
                 );
                 if (filePath) {
-                    std::string file = filePath;
-                    file = file.substr(file.find_last_of("\\") + 1);
-
-                    // Remove .fbx extension
-                    if (file.size() > 4 && file.substr(file.size() - 4) == ".fbx") {
-                        file = file.substr(0, file.size() - 4);
-                    }
-
-                    // Ensure unique name
-                    std::string uniqueFile = file;
-                    int counter = 1;
-                    while (std::find(_objects.begin(), _objects.end(), uniqueFile) != _objects.end()) {
-                        uniqueFile = file + "(" + std::to_string(counter++) + ")";
-                    }
-
-                    _objects.push_back(uniqueFile);
+					GameObject go;
+                    fileManager.LoadFile(filePath, go);
+					scene.emplaceChild(go);
                     // Handle the selected file path
                     // For example, you can load the FBX file here
                     // loadFBX(filePath);
@@ -77,43 +64,31 @@ void MyGUI::render() {
     ImGui::SetNextWindowSize(ImVec2(300, 700), ImGuiCond_Always);
     ImGui::SetNextWindowPos(ImVec2(0, 20), ImGuiCond_Always);
     if (ImGui::Begin("Gameobjects", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
-        for (int i = 0; i < _objects.size(); ++i) {
-            if (ImGui::Selectable(_objects[i].c_str(), _selectedObjectIndex == i)) {
-                _selectedObjectIndex = i;
-                _isRenaming = false;
-            }
-            if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
-                _isRenaming = true;
-                strncpy_s(_renameBuffer, _objects[_selectedObjectIndex].c_str(), sizeof(_renameBuffer));
-                _renameBuffer[sizeof(_renameBuffer) - 1] = '\0';
-                ImGui::SetKeyboardFocusHere(); // Set focus to the input text field
-            }
-            // Capture the position of the selected item
-            if (_selectedObjectIndex == i) {
-                _selectedItemPos = ImGui::GetItemRectMin();
-                _selectedItemSize = ImGui::GetItemRectSize();
-            }
-        }
-        if (_selectedObjectIndex != -1 && _isRenaming) {
-            // Calculate the position for the renaming input box
-            ImVec2 renamePos = ImVec2(_selectedItemPos.x, _selectedItemPos.y + _selectedItemSize.y);
+        for (auto& child : scene.getChildren()) {
+            static char newName[128] = "";
+            static bool renaming = false;
+            static GameObject* renamingObject = nullptr;
 
-            // Set the position of the renaming input box
-            ImGui::SetNextWindowPos(renamePos);
-
-            ImGui::Begin("Rename", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize);
-            ImGui::SetKeyboardFocusHere(); // Ensure the text is selected
-            ImGui::InputText("##Rename", _renameBuffer, sizeof(_renameBuffer));
-            if (ImGui::IsKeyPressed(ImGuiKey_Enter)) {
-                _objects[_selectedObjectIndex] = _renameBuffer;
-                _isRenaming = false;
-                _selectedObjectIndex = -1; // Deselect the object after renaming
+            if (renaming && renamingObject == &child) {
+                ImGui::SetKeyboardFocusHere();
+                if (ImGui::InputText("##rename", newName, IM_ARRAYSIZE(newName), ImGuiInputTextFlags_EnterReturnsTrue)) {
+                    child.name = newName;
+                    renaming = false;
+                }
+                if (ImGui::IsItemDeactivated() || ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+                    renaming = false;
+                }
             }
-            if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
-                _isRenaming = false;
-                _selectedObjectIndex = -1; // Deselect the object after canceling
+            else {
+                if (ImGui::Selectable(child.name.c_str())) {
+                    // Handle selection logic if needed
+                }
+                if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
+                    renaming = true;
+                    renamingObject = &child;
+                    strcpy_s(newName, child.name.c_str());
+                }
             }
-            ImGui::End();
         }
     }
     ImGui::End();

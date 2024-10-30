@@ -23,7 +23,10 @@ public:
 		_children.back()._parent = static_cast<T*>(this);
 		return _children.back();
 	}
+	
 
 	void removeChild(const T& child) { return _children.remove(std::forward(child)); }
+	auto& getChildren() { return _children; }
+
 };
 

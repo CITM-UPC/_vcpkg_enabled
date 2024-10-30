@@ -2,6 +2,7 @@
 #include <string>
 using namespace std;
 #include "Engine/GameObject.h"
+#include "Engine/Scene.h"
 #include <glm/glm.hpp>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -43,7 +44,6 @@ static Camera camera;
 glm::dmat4 projectionMatrix;
 glm::dmat4 viewMatrix;
 
-static GameObject scene;
 
 static bool middleMousePressed = false;
 static ivec2 lastMousePosition;

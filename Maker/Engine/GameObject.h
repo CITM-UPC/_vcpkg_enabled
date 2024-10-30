@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string> 
 #include <glm/glm.hpp>
 #include "TreeExt.h"
 #include "Transform.h"
@@ -10,10 +11,12 @@
 
 class GameObject : public TreeExt<GameObject>
 {
+public:
 	Transform _transform;
 	glm::u8vec3 _color = glm::u8vec3(255, 255, 255);
 	Texture _texture;
 	std::shared_ptr<Mesh> _mesh_ptr;
+	std::string name = "GameObject"; 
 
 public:
 	const auto& transform() const { return _transform; }
@@ -39,7 +42,5 @@ public:
 	static std::shared_ptr<GameObject> createSphere();
 	static std::shared_ptr<GameObject> createCylinder();
 
-
 	void draw() const;
 };
-
