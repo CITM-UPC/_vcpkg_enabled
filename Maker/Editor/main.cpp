@@ -48,7 +48,18 @@ glm::dmat4 viewMatrix;
 static bool middleMousePressed = false;
 static ivec2 lastMousePosition;
 static bool rightMousePressed = false;
+static bool leftMousePressed = false;
+static vector <GameObject> gameObjects;
+GameObject* selectedObject = nullptr;
 static double moveSpeed = 0.1;
+float yaw = 0.0f;
+float pitch = 0.0f;
+const float MAX_PITCH = 89.0f;
+bool altKeyPressed = false;
+vec3 target;
+ivec2 delta;
+int lastMouseX; 
+int lastMouseY;
 
 
 // Function to convert screen coordinates to world coordinates
@@ -102,6 +113,34 @@ bool rayIntersectsBoundingBox(const glm::vec3& rayOrigin, const glm::vec3& rayDi
 		return false;
 
 	return true;
+}
+
+glm::vec3 getRayFromMouse(int mouseX, int mouseY, const glm::mat4& projection, const glm::mat4& view, const glm::ivec2& viewportSize) {
+	float x = (2.0f * mouseX) / viewportSize.x - 1.0f;
+	float y = 1.0f - (2.0f * mouseY) / viewportSize.y;
+	glm::vec4 rayClip = glm::vec4(x, y, -1.0f, 1.0f);
+
+	glm::vec4 rayEye = glm::inverse(projection) * rayClip;
+	rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
+
+	glm::vec3 rayWorld = glm::normalize(glm::vec3(glm::inverse(view) * rayEye));
+	return rayWorld;
+}
+
+GameObject* raycastFromMouseToGameObject(int mouseX, int mouseY, const glm::mat4& projection, const glm::mat4& view, const glm::ivec2& viewportSize) {
+	glm::vec3 rayOrigin = glm::vec3(glm::inverse(view) * glm::vec4(0, 0, 0, 1));
+	glm::vec3 rayDirection = getRayFromMouse(mouseX, mouseY, projection, view, viewportSize);
+
+	GameObject* hitObject = nullptr;
+
+	for (auto& go : gameObjects) {
+		if (rayIntersectsBoundingBox(rayOrigin, rayDirection, go.boundingBox())) {
+			hitObject = &go;
+			break;
+		}
+	}
+
+	return hitObject;
 }
 
 static void drawFloorGrid(int size, double step) {
@@ -161,18 +200,60 @@ static void mouseWheel_func(int direction) {
 	camera.transform().translate(vec3(0, 0, direction * 0.1));
 }
 
+glm::vec2 getMousePosition() {
+	int x, y;
+	SDL_GetMouseState(&x, &y);
+	return glm::vec2(static_cast<float>(x), static_cast<float>(y));
+}
+
+void orbitCamera(const vec3& target, int deltaX, int deltaY) {
+	const float sensitivity = 0.1f;
+
+	yaw += deltaX * sensitivity;
+	pitch -= deltaY * sensitivity;
+	float distance = glm::length(camera.transform().pos() - target);
+	vec3 newPosition;
+	newPosition.x = target.x + distance * cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	newPosition.y = target.y + distance * sin(glm::radians(pitch));
+	newPosition.z = target.z + distance * sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+	camera.transform().pos() = newPosition;
+	camera.transform().lookAt(target);
+}
+
 static void mouseButton_func(int button, int state, int x, int y) {
 	if (button == SDL_BUTTON_MIDDLE) {
 		middleMousePressed = (state == SDL_PRESSED);
 		if (middleMousePressed) {
-			lastMousePosition = ivec2(x, y); 
+			lastMousePosition = ivec2(x, y);
 		}
 	}
 	if (button == SDL_BUTTON_RIGHT) {
 		rightMousePressed = (state == SDL_PRESSED);
 	}
-}
+	if (button == SDL_BUTTON_LEFT) {
+		if (leftMousePressed) {
+			// Guarda la posición del ratón al hacer clic
+			lastMousePosition = ivec2(x, y);
+			glm::vec2 mouseScreenPos = getMousePosition();
+			glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)WINDOW_SIZE.x / WINDOW_SIZE.y, 0.1f, 100.0f);
+			glm::mat4 view = camera.view();
+			selectedObject = raycastFromMouseToGameObject(mouseScreenPos.x, mouseScreenPos.y, projection, view, WINDOW_SIZE);
 
+			// Establece el objetivo de la órbita
+			if (selectedObject != nullptr) {
+				target = selectedObject->transform().pos();
+			}
+			else {
+				target = glm::vec3(0, 0, 0); 
+			}
+		}
+		else {
+			
+			leftMousePressed = false;
+		}
+	}
+}
 static void handleKeyboardInput() {
 	const Uint8* state = SDL_GetKeyboardState(NULL);
 	if (rightMousePressed) {
@@ -199,7 +280,21 @@ static void handleKeyboardInput() {
 			moveSpeed *= 2;
 		}
 	}
+	if (leftMousePressed) {
+
+		if (leftMousePressed && state[SDL_SCANCODE_LALT]) {
+			glm::vec2 mouseScreenPos = getMousePosition();
+			ivec2 delta = ivec2(mouseScreenPos) - lastMousePosition; // calcula el cambio
+			lastMousePosition = ivec2(mouseScreenPos); // actualiza la última posición del ratón
+
+			orbitCamera(target, delta.x, delta.y); // llama a la función de órbita
+		}
+	}
+
 }
+
+
+
 static void mouseMotion_func(int x, int y) {
 	if (middleMousePressed) {
 		
@@ -210,7 +305,12 @@ static void mouseMotion_func(int x, int y) {
 		camera.transform().translate(vec3(delta.x * 0.01, 0, -delta.y * 0.01));
 		camera.transform().translate(vec3(0, delta.y * 0.01, 0));
 	}
+
+	if (leftMousePressed) {
+		lastMousePosition = ivec2(x, y);
+	}
 }
+
 
 std::string getFileExtension(const std::string& filePath) {
 	// Find the last dot in the file path
