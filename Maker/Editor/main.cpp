@@ -384,6 +384,7 @@ int main(int argc, char* argv[]) {
 	char* dropped_filePath;
 	auto mesh = make_shared<Mesh>();
 	auto imageTexture = make_shared<Image>();
+	auto texture = std::make_shared<Texture>();
 	std::string extension;
 
 	SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
@@ -411,6 +412,7 @@ int main(int argc, char* argv[]) {
 					if (extension == "obj" || extension == "fbx" || extension == "dae") {
 						mesh->LoadFile(dropped_filePath);
 						GameObject go;
+						go.AddComponent<MeshLoader>()->SetMesh(mesh);
 						go.setMesh(mesh);
 						scene.emplaceChild(go);
 					}
@@ -420,7 +422,10 @@ int main(int argc, char* argv[]) {
 						for (auto& child : scene.children()) {
 							if (isMouseOverGameObject(child, mouseX, mouseY)) {
 								imageTexture->LoadTexture(dropped_filePath);
-								child.setTextureImage(imageTexture);
+								texture->setImage(imageTexture);
+								child.GetComponent<MeshLoader>()->GetMesh()->deleteCheckerTexture();
+								child.GetComponent<MeshLoader>()->SetImage(imageTexture);
+								child.GetComponent<MeshLoader>()->SetTexture(texture);
 							}
 						}
 						
