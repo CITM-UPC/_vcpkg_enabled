@@ -1,47 +1,70 @@
 #include "MeshLoader.h"
-#include "Mesh.h"
+#include "GameObject.h" 
+#include "Transform.h"
+#include "Mesh.h" 
+#include "Texture.h"
+#include <GL/glew.h>
+#include <glm/gtc/type_ptr.hpp>
+#include "Image.h"
 
-void MeshLoader::LoadFile(const char* file_path)
+MeshLoader::MeshLoader(std::weak_ptr<GameObject> owner) : Component(owner) {}
+
+void MeshLoader::SetMesh(std::shared_ptr<Mesh> mesh)
 {
-	//const aiScene* scene = aiImportFile(file_path, aiProcessPreset_TargetRealtime_MaxQuality);
+    this->mesh = mesh;
+}
 
-	//if (scene != nullptr && scene->HasMeshes()) {
-	//	for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
-	//		size_t num_vertices = scene->mMeshes[i]->mNumVertices;
-	//		glm::vec3* vertex = new glm::vec3[num_vertices * 3];
-	//		memcpy(vertex, scene->mMeshes[i]->mVertices, sizeof(float) * num_vertices * 3);
+std::shared_ptr<Mesh> MeshLoader::GetMesh() const
+{
+    return mesh;
+}
 
+void MeshLoader::SetColor(const glm::vec3& color)
+{
+    this->color = color;
+}
 
-	//		if (scene->mMeshes[i]->HasFaces()) {
-	//			size_t num_index = scene->mMeshes[i]->mNumFaces * 3;
-	//			unsigned int* index = new unsigned int[num_index]; // assume each face is a triangle
-	//			for (unsigned int j = 0; j < scene->mMeshes[i]->mNumFaces; ++j) {
-	//				memcpy(&index[j * 3], scene->mMeshes[i]->mFaces[j].mIndices, 3 * sizeof(unsigned int));
-	//			}
-	//			_mesh_ptr->load(vertex, num_vertices, index, num_index);
-	//		}
+glm::vec3 MeshLoader::GetColor() const
+{
+    return color;
+}
 
-	//		if (scene->mMeshes[i]->HasTextureCoords(0)) {
-	//			glm::vec2* texCoords = new glm::vec2[num_vertices];
-	//			for (size_t j = 0; j < num_vertices; ++j) {
-	//				texCoords[j] = glm::vec2(
-	//					scene->mMeshes[i]->mTextureCoords[0][j].x,
-	//					-scene->mMeshes[i]->mTextureCoords[0][j].y
-	//				);
-	//			}
-	//			_mesh_ptr->loadTexCoords(texCoords, num_vertices);
-	//			delete[] texCoords;
-	//		}
+void MeshLoader::SetTexture(std::shared_ptr<Texture> texture)
+{
+    this->texture = texture;
+}
 
+std::shared_ptr<Texture> MeshLoader::GetTexture() const
+{
+    return texture;
+}
 
-	//	}
-	//	aiReleaseImport(scene);
+void MeshLoader::SetImage(std::shared_ptr<Image> image)
+{
+	this->image = image;
+}
 
-	//	
-	//}
-	//else {
-	//	// Handle error
-	//}
+std::shared_ptr<Image> MeshLoader::GetImage() const
+{
+    return image;
+}
 
+void MeshLoader::Render() const
+{
+    if (texture && drawTexture)
+    {
+        glEnable(GL_TEXTURE_2D);
+        texture->bind();
+	}
+	else if (!texture || !drawTexture)
+	{
+		mesh->CheckerTexture();
+	}
 
+    if (mesh) mesh->draw();
+
+    if (texture)
+    {
+        glDisable(GL_TEXTURE_2D);
+    }
 }

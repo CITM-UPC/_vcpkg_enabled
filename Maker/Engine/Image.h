@@ -12,12 +12,14 @@ class Image {
 	unsigned short _width = 0;
 	unsigned short _height = 0;
 	unsigned char _channels = 0;
+	std::unique_ptr<unsigned char[]> _data;
 
 public:
 	unsigned int id() const { return _id; }
 	auto width() const { return _width; }
 	auto height() const { return _height; }
 	auto channels() const { return _channels; }
+	const unsigned char* data() const { return _data.get(); }
 
 	Image() = default;
 	Image(const Image&) = delete;

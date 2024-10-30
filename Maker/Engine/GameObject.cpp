@@ -3,9 +3,19 @@
 #include <iostream>
 using namespace std;
 
+GameObject::GameObject(const std::string& name) : name(name), cachedComponentType(typeid(Component))
+{
+	_transform = AddComponent<TransformComponent>();
+}
+
+GameObject::~GameObject()
+{
+	
+}
+
 void GameObject::draw() const {
 	glPushMatrix();
-	glMultMatrixd(_transform.data());
+	glMultMatrixd(_transform->GetData());
 	glColor3ubv(&_color.r);
 
 	if (hasTexture() && drawTexture) {
@@ -24,13 +34,55 @@ void GameObject::draw() const {
 	for (const auto& child : children()) child.draw();
 
 	glPopMatrix();
+
+	/*glPushMatrix();
+	glMultMatrixd(_transform->GetData());
+
+	if (auto meshRenderer = GetComponent<MeshLoader>())
+	{
+		meshRenderer->Render();
+
+		if (hasTexture() && meshRenderer->drawTexture) {
+			glEnable(GL_TEXTURE_2D);
+			_texture.bind();
+		}
+		else if (!hasTexture() || !meshRenderer->drawTexture)
+		{
+			_mesh_ptr->CheckerTexture();
+		}
+		if (hasTexture()) glDisable(GL_TEXTURE_2D);
+	}
+
+
+
+	for (const auto& child : children())
+	{
+		child.draw();
+	}
+
+	glPopMatrix();*/
+}
+
+std::string GameObject::GetName() const
+{
+	return name;
+}
+
+void GameObject::SetName(const std::string& name)
+{
+	this->name = name;
+}
+
+bool GameObject::CompareTag(const std::string& tag) const
+{
+	return this->tag == tag;
 }
 
 BoundingBox GameObject::boundingBox() const {
 	BoundingBox bbox = localBoundingBox();
 	if (!_mesh_ptr && children().size()) bbox = children().front().boundingBox();
 	for (const auto& child : children()) bbox = bbox + child.boundingBox();
-	return _transform.mat() * bbox;
+	return _transform->GetMatrix() * bbox;
 }
 
 void GameObject::drawAxis(double size) {
@@ -73,7 +125,7 @@ void GameObject::drawDebug(const GameObject& obj) {
 	glPushMatrix();
 	glColor3ub(255, 255, 0);
 	drawBoundingBox(obj.boundingBox());
-	glMultMatrixd(obj.transform().data());
+	glMultMatrixd(obj.GetTransform()->GetData());
 	drawAxis(0.5);
 	glColor3ub(0, 255, 255);
 	drawBoundingBox(obj.localBoundingBox());

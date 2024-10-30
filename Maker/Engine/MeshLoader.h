@@ -1,25 +1,40 @@
 #pragma once
 
-
-#include <assimp/Importer.hpp>
-#include <assimp/cimport.h>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <vector>
+#include "Component.h"
 #include <glm/glm.hpp>
-#include <memory>
-#include "Mesh.h"
-#include "TreeExt.h"
 
-class MeshLoader
-{
+class Mesh;
+class Texture;
+class Image;
 
-	//std::shared_ptr<Mesh> _mesh_ptr;
+class MeshLoader : public Component {
+public:
+    explicit MeshLoader(std::weak_ptr<GameObject> owner);
+    ~MeshLoader() override = default;
+
+    void SetMesh(std::shared_ptr<Mesh> mesh);
+    std::shared_ptr<Mesh> GetMesh() const;
+
+    void SetTexture(std::shared_ptr<Texture> texture);
+    std::shared_ptr<Texture> GetTexture() const;
+
+    void SetImage(std::shared_ptr<Image> image);
+    std::shared_ptr<Image> GetImage() const;
+
+    void SetColor(const glm::vec3& color);
+    glm::vec3 GetColor() const;
+
+    void Render() const;
+
+    
+
+private:
+    std::shared_ptr<Mesh> mesh;
+    std::shared_ptr<Image> image;
+    std::shared_ptr<Texture> texture;
+    glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 
 public:
-	// Load Meshes from a file
-	void LoadFile(const char* file_path);
-
-	//const auto& GetMeshData() const { return *_mesh_ptr; }
+    bool drawTexture = true;
 };
 

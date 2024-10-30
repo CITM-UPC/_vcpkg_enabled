@@ -14,6 +14,8 @@ private:
 	Transform _transform;
 
 public:
+	
+
 	const auto& transform() const { return _transform; }
 	auto& transform() { return _transform; }
 
