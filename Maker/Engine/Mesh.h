@@ -7,6 +7,7 @@
 #include <IL/ilu.h>
 #include <vector>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "BufferObject.h"
 #include "BoundingBox.h"
 #include "MeshLoader.h"
@@ -44,6 +45,7 @@ public:
 	void loadNormals(const glm::vec3* normals, size_t num_normals);
 	void loadColors(const glm::u8vec3* colors, size_t num_colors);
 	void draw() const;
+	void drawNormals(float length) const;
 
 	void LoadFile(const char* filePath);
 

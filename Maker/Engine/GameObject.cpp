@@ -14,31 +14,6 @@ GameObject::~GameObject()
 }
 
 void GameObject::draw() const {
-	/*glPushMatrix();
-	glMultMatrixd(_transform->GetData());
-	glColor3ubv(&_color.r);
-
-	if (hasTexture() && drawTexture) {
-		glEnable(GL_TEXTURE_2D);
-		_mesh_ptr->deleteCheckerTexture();
-		_texture.bind();
-	}
-	else if (!hasTexture() || !drawTexture)
-	{
-		_mesh_ptr->CheckerTexture();
-	}
-
-	if (hasMesh()) _mesh_ptr->draw();
-
-	if (hasTexture())
-	{
-		_texture.unbind();
-		glDisable(GL_TEXTURE_2D);
-	}
-
-	for (const auto& child : children()) child.draw();
-
-	glPopMatrix();*/
 
 	glPushMatrix();
 	glMultMatrixd(_transform->GetData());

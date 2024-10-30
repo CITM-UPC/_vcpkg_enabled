@@ -62,6 +62,7 @@ void MeshLoader::Render() const
 	}
 
     if (mesh) mesh->draw();
+    if (drawNormals) mesh->drawNormals(0.1f);
 
     if (texture)
     {

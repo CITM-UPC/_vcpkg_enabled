@@ -136,6 +136,10 @@ void MyGUI::render() {
                     selectedGameObject->GetComponent<MeshLoader>()->GetMesh()->deleteCheckerTexture();
                 }
             }
+
+            if (ImGui::Checkbox("Draw Normals", &selectedGameObject->GetComponent<MeshLoader>()->drawNormals)) {
+                
+            }
         }
         else {
             ImGui::Text("No GameObject selected.");

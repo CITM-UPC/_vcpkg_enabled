@@ -127,6 +127,24 @@ void Mesh::deleteCheckerTexture() {
 	}
 }
 
+void Mesh::drawNormals(float length) const {
+	glBegin(GL_LINES);
+	glColor3ub(255, 0, 0);
+	for (size_t i = 0; i < _indices.size(); i += 3) {
+		glm::vec3 v0 = _vertices[_indices[i]];
+		glm::vec3 v1 = _vertices[_indices[i + 1]];
+		glm::vec3 v2 = _vertices[_indices[i + 2]];
+
+		glm::vec3 normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
+		glm::vec3 center = (v0 + v1 + v2) / 3.0f;
+
+		glVertex3fv(glm::value_ptr(center));
+		glVertex3fv(glm::value_ptr(center + normal * length));
+	}
+	glClearColor(0, 0, 0, 0);
+	glEnd();
+}
+
 void Mesh::LoadFile(const char* file_path)
 {
 	const aiScene* scene = aiImportFile(file_path, aiProcessPreset_TargetRealtime_MaxQuality);
@@ -157,6 +175,13 @@ void Mesh::LoadFile(const char* file_path)
 				}
 				loadTexCoords(texCoords, num_vertices);
 				delete[] texCoords;
+			}
+
+			if (scene->mMeshes[i]->HasNormals()) {
+				glm::vec3* normals = new glm::vec3[num_vertices];
+				memcpy(normals, scene->mMeshes[i]->mNormals, sizeof(float) * num_vertices * 3);
+				loadNormals(normals, num_vertices);
+				delete[] normals;
 			}
 
 
