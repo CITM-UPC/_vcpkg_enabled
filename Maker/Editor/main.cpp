@@ -173,7 +173,7 @@ static void display_func() {
 	
 	for (auto& child : scene.children()) {
 		child.draw();
-		child.transform().translate(glm::vec3(0, 0.001, 0));
+		child.GetTransform()->Translate(glm::vec3(0, 0.001, 0));
 	}
 
 	scene.drawDebug(scene);
@@ -260,7 +260,7 @@ static void mouseButton_func(int button, int state, int x, int y) {
 
 			// Establece el objetivo de la órbita
 			if (selectedObject != nullptr) {
-				target = selectedObject->transform().pos();
+				target = selectedObject->GetTransform()->GetPosition();
 			}
 			else {
 				target = glm::vec3(0, 0, 0); 
@@ -301,8 +301,8 @@ static void handleKeyboardInput() {
 
 	if (state[SDL_SCANCODE_F] && selectedObject != nullptr) {
 		isFpressed != isFpressed;
-		camera.transform().pos() = selectedObject->transform().pos() + vec3(0, 1, 4);
-		camera.transform().lookAt(selectedObject->transform().pos());
+		camera.transform().pos() = selectedObject->GetTransform()->GetPosition() + vec3(0, 1, 4);
+		camera.transform().lookAt(selectedObject->GetTransform()->GetPosition());
 	}
 
 	camera.transform().alignCamera();
