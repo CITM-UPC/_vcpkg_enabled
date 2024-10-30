@@ -136,6 +136,8 @@ static void display_func() {
 		child.transform().translate(glm::vec3(0, 0.001, 0));
 	}
 
+	scene.drawDebug(scene);
+
 	cout << "Number of children: " << scene.children().size() << endl;
 }
 

@@ -3,6 +3,7 @@
 #include <memory>
 #include <string> 
 #include <glm/glm.hpp>
+#include <GL/glew.h>
 #include "TreeExt.h"
 #include "Transform.h"
 #include "Texture.h"
@@ -30,6 +31,8 @@ public:
 
 	BoundingBox boundingBox() const;
 	BoundingBox localBoundingBox() const { return _mesh_ptr ? _mesh_ptr->boundingBox() : BoundingBox(); }
+	void drawWiredQuad(const vec3& v0, const vec3& v1, const vec3& v2, const vec3& v3);
+	void drawBoundingBox(const BoundingBox& box);
 
 	void setTextureImage(const std::shared_ptr<Image>& img_ptr) { _texture.setImage(img_ptr); }
 	void setMesh(const std::shared_ptr<Mesh>& mesh_ptr) { _mesh_ptr = mesh_ptr; }
@@ -43,4 +46,6 @@ public:
 	static std::shared_ptr<GameObject> createCylinder();
 
 	void draw() const;
+	void drawAxis(double size);
+	void drawDebug(const GameObject& obj);
 };
