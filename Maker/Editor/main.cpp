@@ -71,7 +71,36 @@ int lastMouseY;
 
 vec3 TurnScreenCoordinates(int mouseX, int mouseY) {
 
-	return vec3(0.0f, 0.0f, 0.0f);
+	// Obtener el tamaño de la ventana para calcular las coordenadas normalizadas
+	int screenWidth = WINDOW_SIZE.x;
+	int screenHeight = WINDOW_SIZE.y;
+
+	// Normalizar las coordenadas del ratón
+	float x = (2.0f * mouseX) / screenWidth - 1.0f;
+	float y = 1.0f - (2.0f * mouseY) / screenHeight;
+	float z = 1.0f;
+
+	// Crear un vector de coordenadas normalizadas
+	glm::vec3 ray_nds = glm::vec3(x, y, z);
+
+	// Convertir a coordenadas homogéneas
+	glm::vec4 ray_clip = glm::vec4(ray_nds, 1.0);
+
+	// Convertir a coordenadas de ojo
+	glm::vec4 ray_eye = glm::inverse(projectionMatrix) * ray_clip;
+	ray_eye = glm::vec4(ray_eye.x, ray_eye.y, -1.0, 0.0);
+
+	// Convertir a coordenadas del mundo
+	glm::vec3 ray_world = glm::normalize(glm::vec3(glm::inverse(viewMatrix) * ray_eye));
+
+	// Calcular el punto 3D de intersección del rayo con un plano en la escena (ej., plano del suelo)
+	float planeHeight = 0.0f; // Por ejemplo, un plano en Y = 0
+	float t = (planeHeight - camera.transform().pos().y) / ray_world.y;
+
+	// Calcular la posición del punto en el plano de la intersección
+	glm::vec3 intersectionPoint = glm::vec3(camera.transform().pos()) + t * ray_world;
+
+	return intersectionPoint;
 }
 // Function to convert screen coordinates to world coordinates
 glm::vec3 screenToWorldRay(int mouseX, int mouseY, int screenWidth, int screenHeight, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
@@ -258,19 +287,22 @@ static void mouseButton_func(int button, int state, int x, int y) {
 			lastMouseY = y;
 			initialYaw = yaw;
 			initialPitch = pitch;
-
 		}
+		
 	}
 	if (button == SDL_BUTTON_LEFT) {
+		leftMousePressed = (state == SDL_PRESSED);
 		if (leftMousePressed) {
-			leftMousePressed = (state == SDL_PRESSED);
 			// Guarda la posición del ratón al hacer clic
 			/*lastMousePosition = ivec2(x, y);*/
 			lastMouseX = x;
 			lastMouseY = y;
 
-			pointSelected = TurnScreenCoordinates(lastMouseX, lastMouseY);
+			initialYaw = yaw;
+			initialPitch = pitch;
 
+			pointSelected = TurnScreenCoordinates(x, y);
+			std::cout << "Punto seleccionado: " << pointSelected.x << ", " << pointSelected.y << ", " << pointSelected.z << std::endl;
 			
 		}
 	}
@@ -307,6 +339,12 @@ static void handleKeyboardInput() {
 		camera.transform().pos() = selectedGameObject->GetTransform()->GetPosition() + vec3(0, 1, 4);
 		camera.transform().lookAt(selectedGameObject->GetTransform()->GetPosition());
 	}
+	if (state[SDL_SCANCODE_LALT]) {
+		altKeyPressed = true;
+	}
+	else {
+		altKeyPressed = false;
+	}
 
 	camera.transform().alignCamera();
 
@@ -336,18 +374,39 @@ static void mouseMotion_func(int x, int y) {
 		camera.transform().translate(vec3(0, delta.y * 0.01, 0));
 	}
 
-	if (leftMousePressed) {
+	if (leftMousePressed && altKeyPressed) {
 
 		int deltaX = x - lastMouseX;
 		int deltaY = y - lastMouseY;
 
+		// Actualizar la última posición del ratón
+		if (deltaX == 0 && deltaY == 0) {
+			return;
+		}
+
+		// Actualizar la última posición del ratón
 		lastMouseX = x;
 		lastMouseY = y;
 
-		// Actualizar los últimos valores del ratón
+		// Ajustar la sensibilidad según el movimiento del ratón para mayor suavidad
+		const double baseSensitivity = 0.1;
+		double movementMagnitude = glm::length(glm::vec2(deltaX, deltaY));
+		const double adaptiveSensitivity = baseSensitivity * (1.0 + 0.01 * movementMagnitude);
 
-		// Llamar a la función que hace orbitar la cámara
-		orbitCamera(pointSelected, deltaX, deltaY);
+		// Actualizar los ángulos de rotación en base al movimiento del ratón
+		yaw = initialYaw + deltaX * adaptiveSensitivity;
+		pitch = initialPitch - deltaY * adaptiveSensitivity;
+
+		// Limitar el ángulo de inclinación (pitch) para evitar que la cámara se voltee
+		if (pitch > MAX_PITCH) pitch = MAX_PITCH;
+		if (pitch < -MAX_PITCH) pitch = -MAX_PITCH;
+
+		// Aplicar las rotaciones a la cámara
+		camera.transform().rotate(glm::radians(-deltaX * adaptiveSensitivity), glm::vec3(0, -1, 0));
+		camera.transform().rotate(glm::radians(deltaY * adaptiveSensitivity), glm::vec3(-1, 0, 0));
+
+		// Realinear la cámara después de la rotación
+		camera.transform().alignCamera();
 	}
 	if (rightMousePressed) {
 		if (rightMousePressed) {
@@ -483,7 +542,7 @@ int main(int argc, char* argv[]) {
 				//Hasta aquí
 				break;
 			case SDL_MOUSEBUTTONDOWN:
-
+				
 			case SDL_MOUSEBUTTONUP:
 				mouseButton_func(event.button.button, event.button.state, event.button.x, event.button.y);
 				break;
