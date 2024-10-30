@@ -1,5 +1,6 @@
 #include "MyGUI.h"
 #include "Engine/FileManager.h"
+#include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_opengl.h>
 #include <imgui.h>
@@ -60,7 +61,17 @@ void MyGUI::render() {
                 }
             }
             ImGui::EndMenu(); // Close the "File" menu
+
         }
+		if (ImGui::BeginMenu("Help")) {
+            if (ImGui::MenuItem("About")) {
+                // Open a webpage when "About" is clicked
+                const char* url = "https://github.com/CITM-UPC/Badass-Engine";
+                SDL_OpenURL(url);
+            }
+			
+			ImGui::EndMenu(); // Close the "Edit" menu
+		}
         ImGui::EndMainMenuBar(); // Close the main menu bar
     }
 
