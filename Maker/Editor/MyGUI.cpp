@@ -123,6 +123,9 @@ void MyGUI::render() {
                 selectedGameObject->_transform.SetRotation(glm::vec3(rotationArray[0], rotationArray[1], rotationArray[2]));
             }
             
+            if (ImGui::Checkbox("Draw Texture", &selectedGameObject->drawTexture)) {
+
+            }
         }
         else {
             ImGui::Text("No GameObject selected.");
