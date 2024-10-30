@@ -28,6 +28,7 @@ MyGUI::~MyGUI() {
 
 
 FileManager fileManager;
+GameObject* selectedGameObject = nullptr; // Define selectedGameObject
 
 // MyGUI.cpp
 
