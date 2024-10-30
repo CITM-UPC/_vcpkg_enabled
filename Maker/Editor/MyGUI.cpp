@@ -27,6 +27,8 @@ MyGUI::~MyGUI() {
 
 
 FileManager fileManager;
+GameObject* selectedGameObject = nullptr; // Define selectedGameObject
+
 // MyGUI.cpp
 
 void MyGUI::render() {
@@ -80,8 +82,8 @@ void MyGUI::render() {
                 }
             }
             else {
-                if (ImGui::Selectable(child.name.c_str())) {
-                    // Handle selection logic if needed
+                if (ImGui::Selectable(child.name.c_str(), selectedGameObject == &child)) {
+                    selectedGameObject = &child;
                 }
                 if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
                     renaming = true;
@@ -89,6 +91,31 @@ void MyGUI::render() {
                     strcpy_s(newName, child.name.c_str());
                 }
             }
+        }
+    }
+    ImGui::End();
+
+    ImGui::SetNextWindowSize(ImVec2(500, 700), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(780, 20), ImGuiCond_Always);
+    if (ImGui::Begin("Inspector", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
+        if (selectedGameObject) {
+            ImGui::Text("Selected GameObject: %s", selectedGameObject->name.c_str());
+
+            // Display position
+            ImGui::Text("Position");
+            float position[3] = { static_cast<float>(selectedGameObject->_transform.pos().x),
+                      static_cast<float>(selectedGameObject->_transform.pos().y),
+                      static_cast<float>(selectedGameObject->_transform.pos().z) };
+
+            if (ImGui::InputFloat3("##position", position)) {
+                selectedGameObject->_transform.pos() = glm::vec3(position[0], position[1], position[2]);
+            }
+
+
+            
+        }
+        else {
+            ImGui::Text("No GameObject selected.");
         }
     }
     ImGui::End();
