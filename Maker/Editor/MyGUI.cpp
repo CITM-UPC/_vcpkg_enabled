@@ -118,7 +118,7 @@ void MyGUI::render() {
                       static_cast<float>(selectedGameObject->_transform->GetPosition().z) };
 
             if (ImGui::InputFloat3("##position", position)) {
-                //selectedGameObject->_transform->SetPosition(glm::vec3(position[0], position[1], position[2]));
+                //selectedGameObject->_transform->Translate(glm::dvec3(position[0], position[1], position[2]));
             }
 
             // Display rotation
