@@ -36,6 +36,7 @@ void MyGUI::render() {
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
+	//Main Menu bar, Comment the line below if you don't want the main menu bar to appear
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Import FBX")) {
@@ -65,6 +66,7 @@ void MyGUI::render() {
 
     ImGui::SetNextWindowSize(ImVec2(300, 700), ImGuiCond_Always);
     ImGui::SetNextWindowPos(ImVec2(0, 20), ImGuiCond_Always);
+	//GameObject window, Comment the line below if you don't want the GameObject window to appear
     if (ImGui::Begin("Gameobjects", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
         for (auto& child : scene.getChildren()) {
             static char newName[128] = "";
@@ -97,6 +99,7 @@ void MyGUI::render() {
 
     ImGui::SetNextWindowSize(ImVec2(500, 700), ImGuiCond_Always);
     ImGui::SetNextWindowPos(ImVec2(780, 20), ImGuiCond_Always);
+	//Inspector window, Comment the line below if you don't want the Inspector window to appear
     if (ImGui::Begin("Inspector", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
         if (selectedGameObject) {
             ImGui::Text("Selected GameObject: %s", selectedGameObject->name.c_str());
