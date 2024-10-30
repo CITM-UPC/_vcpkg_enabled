@@ -49,6 +49,7 @@ public:
 
 	//
 	void CheckerTexture();
+	void deleteCheckerTexture();
 
 	
 	

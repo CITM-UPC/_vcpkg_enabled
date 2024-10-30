@@ -117,27 +117,31 @@ void MyGUI::render() {
 
             // Display position
             ImGui::Text("Position");
-            float position[3] = { static_cast<float>(selectedGameObject->_transform.pos().x),
-                      static_cast<float>(selectedGameObject->_transform.pos().y),
-                      static_cast<float>(selectedGameObject->_transform.pos().z) };
+            float position[3] = { static_cast<float>(selectedGameObject->_transform->GetPosition().x),
+                      static_cast<float>(selectedGameObject->_transform->GetPosition().y),
+                      static_cast<float>(selectedGameObject->_transform->GetPosition().z) };
 
             if (ImGui::InputFloat3("##position", position)) {
-                selectedGameObject->_transform.pos() = glm::vec3(position[0], position[1], position[2]);
+                selectedGameObject->_transform->GetPosition() = glm::vec3(position[0], position[1], position[2]);
             }
 
             // Display rotation
             ImGui::Text("Rotation");
-            glm::vec3 rotation = selectedGameObject->_transform.GetRotation();
+            glm::vec3 rotation = selectedGameObject->_transform->GetRotation();
             float rotationArray[3] = { rotation.x, rotation.y, rotation.z };
 
             if (ImGui::InputFloat3("##rotation", rotationArray)) {
-                selectedGameObject->_transform.SetRotation(glm::vec3(rotationArray[0], rotationArray[1], rotationArray[2]));
+                //selectedGameObject->_transform->SetRotation(glm::vec3(rotationArray[0], rotationArray[1], rotationArray[2]));
             }
             
-            if (ImGui::Checkbox("Draw Texture", &selectedGameObject->drawTexture)) {
-
+            if (ImGui::Checkbox("Draw Texture", &selectedGameObject->GetComponent<MeshLoader>()->drawTexture)) {
+                if (selectedGameObject->GetComponent<MeshLoader>()->drawTexture)
+                {
+                    selectedGameObject->GetComponent<MeshLoader>()->GetMesh()->deleteCheckerTexture();
+                }
             }
-        }
+                }
+                
         else {
             ImGui::Text("No GameObject selected.");
         }

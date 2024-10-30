@@ -18,6 +18,7 @@ private:
 public:
 	unsigned int id() const { return _img_ptr ? _img_ptr->id() : 0; }
 	void bind() const;
+	void unbind() const;
 	void setImage(const std::shared_ptr<Image>& img_ptr) { _img_ptr = img_ptr; }
 	auto& image() { return _img_ptr; }
 

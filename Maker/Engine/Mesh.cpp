@@ -120,6 +120,13 @@ void Mesh::CheckerTexture()
 
 }
 
+void Mesh::deleteCheckerTexture() {
+	if (texture_id) {
+		glDeleteTextures(1, &texture_id);
+		texture_id = 0;
+	}
+}
+
 void Mesh::LoadFile(const char* file_path)
 {
 	const aiScene* scene = aiImportFile(file_path, aiProcessPreset_TargetRealtime_MaxQuality);

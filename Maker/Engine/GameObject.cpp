@@ -14,12 +14,13 @@ GameObject::~GameObject()
 }
 
 void GameObject::draw() const {
-	glPushMatrix();
+	/*glPushMatrix();
 	glMultMatrixd(_transform->GetData());
 	glColor3ubv(&_color.r);
 
 	if (hasTexture() && drawTexture) {
 		glEnable(GL_TEXTURE_2D);
+		_mesh_ptr->deleteCheckerTexture();
 		_texture.bind();
 	}
 	else if (!hasTexture() || !drawTexture)
@@ -29,38 +30,30 @@ void GameObject::draw() const {
 
 	if (hasMesh()) _mesh_ptr->draw();
 
-	if (hasTexture()) glDisable(GL_TEXTURE_2D);
+	if (hasTexture())
+	{
+		_texture.unbind();
+		glDisable(GL_TEXTURE_2D);
+	}
 
 	for (const auto& child : children()) child.draw();
 
-	glPopMatrix();
+	glPopMatrix();*/
 
-	/*glPushMatrix();
+	glPushMatrix();
 	glMultMatrixd(_transform->GetData());
 
 	if (auto meshRenderer = GetComponent<MeshLoader>())
 	{
 		meshRenderer->Render();
-
-		if (hasTexture() && meshRenderer->drawTexture) {
-			glEnable(GL_TEXTURE_2D);
-			_texture.bind();
-		}
-		else if (!hasTexture() || !meshRenderer->drawTexture)
-		{
-			_mesh_ptr->CheckerTexture();
-		}
-		if (hasTexture()) glDisable(GL_TEXTURE_2D);
 	}
-
-
 
 	for (const auto& child : children())
 	{
 		child.draw();
 	}
 
-	glPopMatrix();*/
+	glPopMatrix();
 }
 
 std::string GameObject::GetName() const
@@ -127,7 +120,7 @@ void GameObject::drawDebug(const GameObject& obj) {
 	drawBoundingBox(obj.boundingBox());
 	glMultMatrixd(obj.GetTransform()->GetData());
 	drawAxis(0.5);
-	glColor3ub(0, 255, 255);
+	glColor3ub(255, 255, 255);
 	drawBoundingBox(obj.localBoundingBox());
 	for (const auto& child : obj.children()) drawDebug(child);
 	glPopMatrix();

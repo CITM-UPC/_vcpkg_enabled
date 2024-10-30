@@ -34,5 +34,9 @@ void Texture::bind() const {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GLMagFilter(filter));
 }
 
+void Texture::unbind() const {
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 
 
