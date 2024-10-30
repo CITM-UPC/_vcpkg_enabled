@@ -34,3 +34,9 @@ void Transform::lookAt(const vec3& target) {
     _mat[2] = vec4(-_fwd, 0.0);
     _mat[3] = vec4(_pos, 1.0);
 }
+
+void Transform::SetPosition(const vec3& position) {
+    _pos = position;
+    // Actualizar la matriz de transformación con la nueva posición
+    _mat[3] = vec4(position, 1.0f);
+}

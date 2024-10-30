@@ -4,6 +4,7 @@ using namespace std;
 #include "Engine/GameObject.h"
 #include "Engine/Scene.h"
 #include <glm/glm.hpp>
+#include <glm/vec2.hpp>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <IL/il.h>
@@ -44,7 +45,11 @@ static Camera camera;
 glm::dmat4 projectionMatrix;
 glm::dmat4 viewMatrix;
 
-
+vec3 pointSelected(0.0f, 0.0f, 0.0f);
+float angleX = 0.0f;
+float angleY = 0.0f;
+float radius = 10.0f; 
+float sensibility = 0.1f;
 static bool middleMousePressed = false;
 static ivec2 lastMousePosition;
 static bool rightMousePressed = false;
@@ -54,15 +59,20 @@ GameObject* selectedObject = nullptr;
 static double moveSpeed = 0.1;
 float yaw = 0.0f;
 float pitch = 0.0f;
+float initialYaw = 0.0f;
+float initialPitch = 0.0f;
 const float MAX_PITCH = 89.0f;
 bool altKeyPressed = false;
 vec3 target;
 ivec2 delta;
 bool isFpressed = false;
-int lastMouseX; 
+int lastMouseX;
 int lastMouseY;
 
+vec3 TurnScreenCoordinates(int mouseX, int mouseY) {
 
+	return vec3(0.0f, 0.0f, 0.0f);
+}
 // Function to convert screen coordinates to world coordinates
 glm::vec3 screenToWorldRay(int mouseX, int mouseY, int screenWidth, int screenHeight, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
 	// Normalize mouse coordinates to [-1, 1]
@@ -170,7 +180,7 @@ static void display_func() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	configureCamera();
 	drawFloorGrid(16, 0.25);
-	
+
 	for (auto& child : scene.children()) {
 		child.draw();
 		child.GetTransform()->Translate(glm::vec3(0, 0.001, 0));
@@ -209,16 +219,27 @@ glm::vec2 getMousePosition() {
 
 void orbitCamera(const vec3& target, int deltaX, int deltaY) {
 	const float sensitivity = 0.1f;
+	const float maxPitch = 89.0f; 
 
+	
 	yaw += deltaX * sensitivity;
 	pitch -= deltaY * sensitivity;
-	float distance = glm::length(camera.transform().pos() - target);
-	vec3 newPosition;
-	newPosition.x = target.x + distance * cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	newPosition.y = target.y + distance * sin(glm::radians(pitch));
-	newPosition.z = target.z + distance * sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
-	camera.transform().pos() = newPosition;
+	
+	if (pitch > maxPitch) pitch = maxPitch;
+	if (pitch < -maxPitch) pitch = -maxPitch;
+
+	
+	float distance = glm::length(camera.transform().pos() - target);
+
+	
+	vec3 newPosition;
+	newPosition.x = target.x + distance * cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+	newPosition.y = target.y + distance * sin(glm::radians(pitch));
+	newPosition.z = target.z + distance * cos(glm::radians(pitch)) * cos(glm::radians(yaw));
+
+	
+	camera.transform().SetPosition(newPosition);
 	camera.transform().lookAt(target);
 }
 
@@ -231,44 +252,26 @@ static void mouseButton_func(int button, int state, int x, int y) {
 	}
 	if (button == SDL_BUTTON_RIGHT) {
 		rightMousePressed = (state == SDL_PRESSED);
-		int deltaX = x - lastMouseX;
-		int deltaY = y - lastMouseY;
+		// Calcular la diferencia de movimiento del ratón
+		if (rightMousePressed) {
+			lastMouseX = x;
+			lastMouseY = y;
+			initialYaw = yaw;
+			initialPitch = pitch;
 
-		const double sensitivity = 0.1;
-
-		yaw += deltaX * sensitivity;
-		pitch -= deltaY * sensitivity;
-
-		if (pitch > MAX_PITCH) pitch = MAX_PITCH;
-		if (pitch < -MAX_PITCH) pitch = -MAX_PITCH;
-
-		camera.transform().rotate(glm::radians(-deltaX * sensitivity), glm::vec3(0, -1, 0));
-		camera.transform().rotate(glm::radians(deltaY * sensitivity), glm::vec3(-1, 0, 0));
-
-		lastMouseX = x;
-		lastMouseY = y;
-		camera.transform().alignCamera();
+		}
 	}
 	if (button == SDL_BUTTON_LEFT) {
 		if (leftMousePressed) {
+			leftMousePressed = (state == SDL_PRESSED);
 			// Guarda la posición del ratón al hacer clic
-			lastMousePosition = ivec2(x, y);
-			glm::vec2 mouseScreenPos = getMousePosition();
-			glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)WINDOW_SIZE.x / WINDOW_SIZE.y, 0.1f, 100.0f);
-			glm::mat4 view = camera.view();
-			selectedObject = raycastFromMouseToGameObject(mouseScreenPos.x, mouseScreenPos.y, projection, view, WINDOW_SIZE);
+			/*lastMousePosition = ivec2(x, y);*/
+			lastMouseX = x;
+			lastMouseY = y;
 
-			// Establece el objetivo de la órbita
-			if (selectedObject != nullptr) {
-				target = selectedObject->GetTransform()->GetPosition();
-			}
-			else {
-				target = glm::vec3(0, 0, 0); 
-			}
-		}
-		else {
+			pointSelected = TurnScreenCoordinates(lastMouseX, lastMouseY);
+
 			
-			leftMousePressed = false;
 		}
 	}
 }
@@ -307,16 +310,16 @@ static void handleKeyboardInput() {
 
 	camera.transform().alignCamera();
 
-	if (leftMousePressed) {
+	/*if (leftMousePressed) {
 
 		if (leftMousePressed && state[SDL_SCANCODE_LALT]) {
 			glm::vec2 mouseScreenPos = getMousePosition();
-			ivec2 delta = ivec2(mouseScreenPos) - lastMousePosition; // calcula el cambio
-			lastMousePosition = ivec2(mouseScreenPos); // actualiza la última posición del ratón
+			ivec2 delta = ivec2(mouseScreenPos) - lastMousePosition; 
+			lastMousePosition = ivec2(mouseScreenPos); 
 
-			orbitCamera(target, delta.x, delta.y); // llama a la función de órbita
+			orbitCamera(target, delta.x, delta.y); 
 		}
-	}
+	}*/
 
 }
 
@@ -324,17 +327,60 @@ static void handleKeyboardInput() {
 
 static void mouseMotion_func(int x, int y) {
 	if (middleMousePressed) {
-		
+
 		ivec2 delta = ivec2(x, y) - lastMousePosition;
 		lastMousePosition = ivec2(x, y);
 
-		
+
 		camera.transform().translate(vec3(delta.x * 0.01, 0, -delta.y * 0.01));
 		camera.transform().translate(vec3(0, delta.y * 0.01, 0));
 	}
 
 	if (leftMousePressed) {
-		lastMousePosition = ivec2(x, y);
+
+		int deltaX = x - lastMouseX;
+		int deltaY = y - lastMouseY;
+
+		lastMouseX = x;
+		lastMouseY = y;
+
+		// Actualizar los últimos valores del ratón
+
+		// Llamar a la función que hace orbitar la cámara
+		orbitCamera(pointSelected, deltaX, deltaY);
+	}
+	if (rightMousePressed) {
+		if (rightMousePressed) {
+			// Calcular la diferencia de movimiento del ratón
+			int deltaX = x - lastMouseX;
+			int deltaY = y - lastMouseY;
+
+			if (deltaX != 0 || deltaY != 0) {
+				// Ajustar la sensibilidad según el movimiento del ratón para mayor suavidad
+				const double baseSensitivity = 0.1;
+				double movementMagnitude = glm::length(glm::vec2(deltaX, deltaY));
+				const double adaptiveSensitivity = baseSensitivity * (1.0 + 0.01 * movementMagnitude);
+
+				// Actualizar los ángulos de rotación
+				yaw = initialYaw + deltaX * adaptiveSensitivity;
+				pitch = initialPitch - deltaY * adaptiveSensitivity;
+
+				// Limitar el ángulo de inclinación (pitch) para evitar que la cámara se voltee
+				if (pitch > MAX_PITCH) pitch = MAX_PITCH;
+				if (pitch < -MAX_PITCH) pitch = -MAX_PITCH;
+
+				// Aplicar las rotaciones utilizando interpolación suave
+				camera.transform().rotate(glm::radians(-deltaX * adaptiveSensitivity), glm::vec3(0, -1, 0));
+				camera.transform().rotate(glm::radians(deltaY * adaptiveSensitivity), glm::vec3(-1, 0, 0));
+
+				// Guardar la última posición del ratón
+				lastMouseX = x;
+				lastMouseY = y;
+
+				// Realinear la cámara después de la rotación
+				camera.transform().alignCamera();
+			}
+		}
 	}
 }
 
@@ -368,8 +414,8 @@ bool isMouseOverGameObject(const GameObject& go, int mouseX, int mouseY) {
 }
 
 int main(int argc, char* argv[]) {
-	
-	
+
+
 	ilInit();
 	iluInit();
 	ilutInit();
@@ -403,55 +449,55 @@ int main(int argc, char* argv[]) {
 		{
 			gui.processEvent(event);
 			//window.processEvents(&gui);
-			
+
 			switch (event.type) {
-				case SDL_DROPFILE:
-					dropped_filePath = event.drop.file;
-					extension = getFileExtension(dropped_filePath);
+			case SDL_DROPFILE:
+				dropped_filePath = event.drop.file;
+				extension = getFileExtension(dropped_filePath);
 
-					if (extension == "obj" || extension == "fbx" || extension == "dae") {
-						mesh->LoadFile(dropped_filePath);
-						GameObject go;
-						go.AddComponent<MeshLoader>()->SetMesh(mesh);
-						go.setMesh(mesh);
-						scene.emplaceChild(go);
-					}
-					else if (extension == "png" || extension == "jpg" || extension == "bmp") {
-						int mouseX, mouseY;
-						SDL_GetMouseState(&mouseX, &mouseY);
-						for (auto& child : scene.children()) {
-							if (isMouseOverGameObject(child, mouseX, mouseY)) {
-								imageTexture->LoadTexture(dropped_filePath);
-								texture->setImage(imageTexture);
-								child.GetComponent<MeshLoader>()->GetMesh()->deleteCheckerTexture();
-								child.GetComponent<MeshLoader>()->SetImage(imageTexture);
-								child.GetComponent<MeshLoader>()->SetTexture(texture);
-							}
+				if (extension == "obj" || extension == "fbx" || extension == "dae") {
+					mesh->LoadFile(dropped_filePath);
+					GameObject go;
+					go.AddComponent<MeshLoader>()->SetMesh(mesh);
+					go.setMesh(mesh);
+					scene.emplaceChild(go);
+				}
+				else if (extension == "png" || extension == "jpg" || extension == "bmp") {
+					int mouseX, mouseY;
+					SDL_GetMouseState(&mouseX, &mouseY);
+					for (auto& child : scene.children()) {
+						if (isMouseOverGameObject(child, mouseX, mouseY)) {
+							imageTexture->LoadTexture(dropped_filePath);
+							texture->setImage(imageTexture);
+							child.GetComponent<MeshLoader>()->GetMesh()->deleteCheckerTexture();
+							child.GetComponent<MeshLoader>()->SetImage(imageTexture);
+							child.GetComponent<MeshLoader>()->SetTexture(texture);
 						}
-						
 					}
-					else {
-						std::cerr << "Unsupported file extension: " << extension << std::endl;
-					}
-					SDL_free(dropped_filePath);
-					//Hasta aquí
-					break;
-				case SDL_MOUSEBUTTONDOWN:
-					
-				case SDL_MOUSEBUTTONUP:
-					mouseButton_func(event.button.button, event.button.state, event.button.x, event.button.y);
-					break;
-				case SDL_MOUSEMOTION:
-					mouseMotion_func(event.motion.x, event.motion.y);
-					break;
 
-				case SDL_MOUSEWHEEL:
-					mouseWheel_func(event.wheel.y);
-					break;
+				}
+				else {
+					std::cerr << "Unsupported file extension: " << extension << std::endl;
+				}
+				SDL_free(dropped_filePath);
+				//Hasta aquí
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+
+			case SDL_MOUSEBUTTONUP:
+				mouseButton_func(event.button.button, event.button.state, event.button.x, event.button.y);
+				break;
+			case SDL_MOUSEMOTION:
+				mouseMotion_func(event.motion.x, event.motion.y);
+				break;
+
+			case SDL_MOUSEWHEEL:
+				mouseWheel_func(event.wheel.y);
+				break;
 			}
 		}
 
-		
+
 	}
 
 	return EXIT_SUCCESS;
