@@ -58,6 +58,7 @@ const float MAX_PITCH = 89.0f;
 bool altKeyPressed = false;
 vec3 target;
 ivec2 delta;
+bool isFpressed = false;
 int lastMouseX; 
 int lastMouseY;
 
@@ -172,7 +173,7 @@ static void display_func() {
 	
 	for (auto& child : scene.children()) {
 		child.draw();
-		child.GetTransform()->Translate(glm::vec3(0, 0.001, 0));
+		child.transform().translate(glm::vec3(0, 0.001, 0));
 	}
 
 	scene.drawDebug(scene);
@@ -230,6 +231,23 @@ static void mouseButton_func(int button, int state, int x, int y) {
 	}
 	if (button == SDL_BUTTON_RIGHT) {
 		rightMousePressed = (state == SDL_PRESSED);
+		int deltaX = x - lastMouseX;
+		int deltaY = y - lastMouseY;
+
+		const double sensitivity = 0.1;
+
+		yaw += deltaX * sensitivity;
+		pitch -= deltaY * sensitivity;
+
+		if (pitch > MAX_PITCH) pitch = MAX_PITCH;
+		if (pitch < -MAX_PITCH) pitch = -MAX_PITCH;
+
+		camera.transform().rotate(glm::radians(-deltaX * sensitivity), glm::vec3(0, -1, 0));
+		camera.transform().rotate(glm::radians(deltaY * sensitivity), glm::vec3(-1, 0, 0));
+
+		lastMouseX = x;
+		lastMouseY = y;
+		camera.transform().alignCamera();
 	}
 	if (button == SDL_BUTTON_LEFT) {
 		if (leftMousePressed) {
@@ -242,7 +260,7 @@ static void mouseButton_func(int button, int state, int x, int y) {
 
 			// Establece el objetivo de la órbita
 			if (selectedObject != nullptr) {
-				target = selectedObject->GetTransform()->GetPosition();
+				target = selectedObject->transform().pos();
 			}
 			else {
 				target = glm::vec3(0, 0, 0); 
@@ -280,6 +298,15 @@ static void handleKeyboardInput() {
 			moveSpeed *= 2;
 		}
 	}
+
+	if (state[SDL_SCANCODE_F] && selectedObject != nullptr) {
+		isFpressed != isFpressed;
+		camera.transform().pos() = selectedObject->transform().pos() + vec3(0, 1, 4);
+		camera.transform().lookAt(selectedObject->transform().pos());
+	}
+
+	camera.transform().alignCamera();
+
 	if (leftMousePressed) {
 
 		if (leftMousePressed && state[SDL_SCANCODE_LALT]) {
@@ -357,7 +384,6 @@ int main(int argc, char* argv[]) {
 	char* dropped_filePath;
 	auto mesh = make_shared<Mesh>();
 	auto imageTexture = make_shared<Image>();
-	auto texture = make_shared<Texture>();
 	std::string extension;
 
 	SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
@@ -385,7 +411,6 @@ int main(int argc, char* argv[]) {
 					if (extension == "obj" || extension == "fbx" || extension == "dae") {
 						mesh->LoadFile(dropped_filePath);
 						GameObject go;
-						go.AddComponent<MeshLoader>()->SetMesh(mesh);
 						go.setMesh(mesh);
 						scene.emplaceChild(go);
 					}
@@ -395,10 +420,7 @@ int main(int argc, char* argv[]) {
 						for (auto& child : scene.children()) {
 							if (isMouseOverGameObject(child, mouseX, mouseY)) {
 								imageTexture->LoadTexture(dropped_filePath);
-								texture->setImage(imageTexture);
-								child.GetComponent<MeshLoader>()->GetMesh()->deleteCheckerTexture();
-								child.GetComponent<MeshLoader>()->SetImage(imageTexture);
-								child.GetComponent<MeshLoader>()->SetTexture(texture);
+								child.setTextureImage(imageTexture);
 							}
 						}
 						
