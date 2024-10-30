@@ -48,6 +48,7 @@ public:
 	void translate(const vec3& v);
 	void rotate(double rads, const vec3& v);
 	void lookAt(const vec3& target);
+	void alignCamera(const vec3& worldUp = vec3(0.0f, 1.0f, 0.0f));
 	void SetRotation(const vec3& eulerAngles) {
 		// Convert degrees to radians
 		vec3 eulerAnglesRad = glm::radians(eulerAngles);
