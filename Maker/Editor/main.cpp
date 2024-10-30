@@ -299,10 +299,10 @@ static void handleKeyboardInput() {
 		}
 	}
 
-	if (state[SDL_SCANCODE_F] && selectedObject != nullptr) {
+	if (state[SDL_SCANCODE_F] && selectedGameObject != nullptr) {
 		isFpressed != isFpressed;
-		camera.transform().pos() = selectedObject->GetTransform()->GetPosition() + vec3(0, 1, 4);
-		camera.transform().lookAt(selectedObject->GetTransform()->GetPosition());
+		camera.transform().pos() = selectedGameObject->GetTransform()->GetPosition() + vec3(0, 1, 4);
+		camera.transform().lookAt(selectedGameObject->GetTransform()->GetPosition());
 	}
 
 	camera.transform().alignCamera();

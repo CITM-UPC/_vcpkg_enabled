@@ -8,6 +8,7 @@
 #include <imgui.h>
 
 using namespace std;
+extern GameObject* selectedGameObject = nullptr; // Define selectedGameObject
 
 class MyGUI : public IEventProcessor
 {
