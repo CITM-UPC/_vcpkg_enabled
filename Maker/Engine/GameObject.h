@@ -17,7 +17,8 @@ public:
 	glm::u8vec3 _color = glm::u8vec3(255, 255, 255);
 	Texture _texture;
 	std::shared_ptr<Mesh> _mesh_ptr;
-	std::string name = "GameObject"; 
+	std::string name = "GameObject";
+	bool drawTexture = true;
 
 public:
 	const auto& transform() const { return _transform; }
