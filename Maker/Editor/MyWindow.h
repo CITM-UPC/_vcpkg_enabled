@@ -3,11 +3,6 @@
 #include <SDL2/SDL_events.h>
 
 
-class IEventProcessor {
-public:
-	virtual void processEvent(const SDL_Event& event) = 0;
-};
-
 class MyWindow {
 
 	SDL_Window* _window = nullptr;
@@ -34,7 +29,7 @@ public:
 	void close();
 	bool isOpen() const { return _window; }
 
-	bool processEvents(IEventProcessor* event_processor = nullptr);
+	void processEvent(const SDL_Event& e);
 	void swapBuffers() const;
 
 };

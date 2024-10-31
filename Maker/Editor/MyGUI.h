@@ -10,7 +10,7 @@
 using namespace std;
 extern GameObject* selectedGameObject; // Define selectedGameObject
 
-class MyGUI : public IEventProcessor
+class MyGUI
 {
 public:
     MyGUI(SDL_Window* window, void* context);
@@ -19,7 +19,7 @@ public:
     MyGUI& operator=(const MyGUI&) = delete;
     ~MyGUI();
     void render();
-    void processEvent(const SDL_Event& event) override;
+    void processEvent(const SDL_Event& event);
 private:
    
 

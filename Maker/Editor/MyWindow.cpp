@@ -44,13 +44,10 @@ void MyWindow::swapBuffers() const {
     SDL_GL_SwapWindow(static_cast<SDL_Window*>(_window));
 }
 
-bool MyWindow::processEvents(IEventProcessor* event_processor) {
-    SDL_Event e;
-    while (SDL_PollEvent(&e)) {
-        if (event_processor) event_processor->processEvent(e);
-        switch (e.type) {
-        case SDL_QUIT: close(); return false;
-        }
+void MyWindow::processEvent(const SDL_Event& e) {
+    switch (e.type) {
+    case SDL_QUIT:
+        close();
+        break;
     }
-    return true;
 }
